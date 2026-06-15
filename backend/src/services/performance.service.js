@@ -1,4 +1,4 @@
-﻿function toNumber(value, fallback = 0) {
+﻿function toNumber(value, fallback = null) {
   if (value === undefined || value === null || value === "") {
     return fallback;
   }
@@ -14,16 +14,38 @@ function clamp(value, min, max) {
 }
 
 function normalizeFive(value) {
-  return clamp(toNumber(value), 0, 5) / 5;
+  const number = toNumber(value);
+
+  if (number === null) {
+    return null;
+  }
+
+  return clamp(number, 0, 5) / 5;
 }
 
 function normalizeTen(value) {
-  return clamp(toNumber(value), 0, 10) / 10;
+  const number = toNumber(value);
+
+  if (number === null) {
+    return null;
+  }
+
+  return clamp(number, 0, 10) / 10;
+}
+
+function averageAvailable(values, fallback = 0.5) {
+  const available = values.filter((value) => value !== null && value !== undefined);
+
+  if (!available.length) {
+    return fallback;
+  }
+
+  return available.reduce((sum, value) => sum + value, 0) / available.length;
 }
 
 function calculatePassAccuracy(accuratePasses, wrongPasses) {
-  const accurate = toNumber(accuratePasses);
-  const wrong = toNumber(wrongPasses);
+  const accurate = toNumber(accuratePasses, 0);
+  const wrong = toNumber(wrongPasses, 0);
   const total = accurate + wrong;
 
   if (total <= 0) {
@@ -34,17 +56,30 @@ function calculatePassAccuracy(accuratePasses, wrongPasses) {
 }
 
 function calculateOffensiveEfficiency(goals, assists, shotsOnTarget) {
-  const shots = toNumber(shotsOnTarget);
+  const shots = toNumber(shotsOnTarget, 0);
+  const goalsValue = toNumber(goals, 0);
+  const assistsValue = toNumber(assists, 0);
+
   if (shots <= 0) {
+    if (goalsValue > 0 || assistsValue > 0) {
+      return 0.75;
+    }
+
     return null;
   }
 
-  return clamp((toNumber(goals) + toNumber(assists)) / shots, 0, 1);
+  return clamp((goalsValue + assistsValue) / shots, 0, 1);
 }
 
 function calculateDisciplinaryIndex(fouls) {
+  const foulsValue = toNumber(fouls);
+
+  if (foulsValue === null) {
+    return null;
+  }
+
   const maxFouls = 10;
-  return clamp(1 - toNumber(fouls) / maxFouls, 0, 1);
+  return clamp(1 - foulsValue / maxFouls, 0, 1);
 }
 
 function getLevelFromScore(score) {
@@ -67,7 +102,10 @@ function labelFromKey(key) {
     finishing: "Finalização",
     dribbling: "Drible",
     decisionMaking: "Tomada de Decisão",
-    discipline: "Disciplina"
+    discipline: "Disciplina",
+    passAccuracyRate: "Precisão de Passe",
+    offensiveEfficiency: "Eficiência Ofensiva",
+    disciplinaryIndex: "Índice Disciplinar"
   };
 
   return labels[key] || key;
@@ -78,10 +116,13 @@ function recommendationFromWeakness(weakness) {
     "Condição Física": "Treino físico de resistência aeróbica, velocidade e força muscular",
     "Controle de Bola": "Treinos de domínio e controle de bola com exercícios de toque e condução",
     "Passe": "Treinos de passe curto e longo, tabelas e visão de jogo sob pressão",
+    "Precisão de Passe": "Treinos de passe curto e longo, tabelas e visão de jogo sob pressão",
     "Finalização": "Treinos de finalização, chute ao gol e posicionamento ofensivo",
+    "Eficiência Ofensiva": "Treinos de finalização, chute ao gol e posicionamento ofensivo",
     "Drible": "Treinos de condução, drible em espaço reduzido e proteção de bola",
     "Tomada de Decisão": "Treinos táticos, leitura de jogo e simulações sob pressão",
-    "Disciplina": "Trabalho comportamental, controle emocional e respeito às regras"
+    "Disciplina": "Trabalho comportamental, controle emocional e respeito às regras",
+    "Índice Disciplinar": "Trabalho comportamental, controle emocional e respeito às regras"
   };
 
   return recommendations[weakness] || "Manter rotina de treino e buscar evolução técnica contínua";
@@ -108,32 +149,36 @@ export function calculatePerformance(evaluation) {
     normalizeFive(evaluation.dribbling)
   ];
 
-  const averageTechnicalScore =
-    technicalItems.reduce((sum, value) => sum + value, 0) / technicalItems.length;
+  const averageTechnicalNormalized = averageAvailable(technicalItems, 0.5);
 
   const physicalScore = normalizeTen(evaluation.physicalCondition);
   const tacticalScore = normalizeFive(evaluation.decisionMaking);
   const disciplineScore = normalizeFive(evaluation.discipline);
 
-  const gameMetricScore =
-    ((passAccuracyRate ?? 0.5) + (offensiveEfficiency ?? 0.5)) / 2;
+  const gameMetricScore = averageAvailable(
+    [passAccuracyRate, offensiveEfficiency],
+    0.5
+  );
 
   const performanceScore =
-    averageTechnicalScore * 40 +
-    physicalScore * 20 +
-    tacticalScore * 15 +
+    averageTechnicalNormalized * 40 +
+    averageAvailable([physicalScore], 0.5) * 20 +
+    averageAvailable([tacticalScore], 0.5) * 15 +
     gameMetricScore * 15 +
-    disciplineScore * 10;
+    averageAvailable([disciplineScore, disciplinaryIndex], 0.5) * 10;
 
   const attributes = [
-    ["physicalCondition", normalizeTen(evaluation.physicalCondition)],
+    ["physicalCondition", physicalScore],
     ["ballControl", normalizeFive(evaluation.ballControl)],
     ["passing", normalizeFive(evaluation.passing)],
     ["finishing", normalizeFive(evaluation.finishing)],
     ["dribbling", normalizeFive(evaluation.dribbling)],
-    ["decisionMaking", normalizeFive(evaluation.decisionMaking)],
-    ["discipline", normalizeFive(evaluation.discipline)]
-  ];
+    ["decisionMaking", tacticalScore],
+    ["discipline", disciplineScore],
+    ["passAccuracyRate", passAccuracyRate],
+    ["offensiveEfficiency", offensiveEfficiency],
+    ["disciplinaryIndex", disciplinaryIndex]
+  ].filter(([, value]) => value !== null && value !== undefined);
 
   const sorted = [...attributes].sort((a, b) => b[1] - a[1]);
 
@@ -151,8 +196,8 @@ export function calculatePerformance(evaluation) {
     calculatedLevel: getLevelFromScore(roundedScore),
     passAccuracyRate: passAccuracyRate === null ? null : Number(passAccuracyRate.toFixed(3)),
     offensiveEfficiency: offensiveEfficiency === null ? null : Number(offensiveEfficiency.toFixed(3)),
-    disciplinaryIndex: Number(disciplinaryIndex.toFixed(3)),
-    averageTechnicalScore: Number((averageTechnicalScore * 5).toFixed(2)),
+    disciplinaryIndex: disciplinaryIndex === null ? null : Number(disciplinaryIndex.toFixed(3)),
+    averageTechnicalScore: Number((averageTechnicalNormalized * 5).toFixed(2)),
     strengths,
     weaknesses,
     recommendations

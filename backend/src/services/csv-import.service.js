@@ -37,8 +37,71 @@ function normalizeName(value) {
   return String(value || "").trim();
 }
 
-function buildAccessCode(index) {
-  return `NF-${String(index + 1).padStart(4, "0")}`;
+function normalizeComparable(value) {
+  return String(value || "")
+    .trim()
+    .toLowerCase()
+    .normalize("NFD")
+    .replace(/\p{Diacritic}/gu, "");
+}
+
+async function generateNextAccessCode() {
+  const lastAthlete = await prisma.athlete.findFirst({
+    where: {
+      accessCode: {
+        startsWith: "NF-"
+      }
+    },
+    orderBy: {
+      accessCode: "desc"
+    }
+  });
+
+  if (!lastAthlete) {
+    return "NF-0001";
+  }
+
+  const lastNumber = Number(lastAthlete.accessCode.replace("NF-", ""));
+
+  if (!Number.isFinite(lastNumber)) {
+    return `NF-${String(Date.now()).slice(-6)}`;
+  }
+
+  return `NF-${String(lastNumber + 1).padStart(4, "0")}`;
+}
+
+async function findMatchingAthlete({ name, age, position, region, explicitAccessCode }) {
+  if (explicitAccessCode) {
+    const byCode = await prisma.athlete.findUnique({
+      where: {
+        accessCode: explicitAccessCode
+      }
+    });
+
+    if (byCode) {
+      return byCode;
+    }
+  }
+
+  const candidates = await prisma.athlete.findMany({
+    where: {
+      name
+    }
+  });
+
+  return candidates.find((candidate) => {
+    const sameAge = age === null || candidate.age === age;
+    const samePosition =
+      !position ||
+      !candidate.position ||
+      normalizeComparable(candidate.position) === normalizeComparable(position);
+    const sameRegion =
+      !region ||
+      !candidate.region ||
+      normalizeComparable(candidate.region) === normalizeComparable(region);
+
+    return sameAge && samePosition && sameRegion;
+  }) || null;
 }
 
 function mapLevel(value) {
@@ -88,10 +151,23 @@ function mapEvaluation(row) {
   };
 }
 
+function hasAnyEvaluationData(evaluationData) {
+  return Object.entries(evaluationData).some(([key, value]) => {
+    if (["source", "approved", "level"].includes(key)) {
+      return false;
+    }
+
+    return value !== null && value !== undefined;
+  });
+}
+
 export async function importAthletesFromCsv(records) {
   const summary = {
     received: records.length,
     imported: 0,
+    athletesCreated: 0,
+    athletesUpdated: 0,
+    evaluationsCreated: 0,
     skipped: 0,
     errors: []
   };
@@ -108,52 +184,59 @@ export async function importAthletesFromCsv(records) {
       continue;
     }
 
-    const accessCode = normalizeName(
-      getValue(row, ["accessCode", "codigo", "código", "codigo_acesso"], buildAccessCode(index))
+    const age = toInt(getValue(row, ["idade", "age"]));
+    const position = getValue(row, ["posicao", "posição", "position"]);
+    const region = getValue(row, ["regiao", "região", "region"]);
+    const explicitAccessCode = normalizeName(
+      getValue(row, ["accessCode", "codigo", "código", "codigo_acesso"])
     );
 
-    const athlete = await prisma.athlete.upsert({
-      where: {
-        accessCode
-      },
-      update: {
-        name,
-        age: toInt(getValue(row, ["idade", "age"])),
-        position: getValue(row, ["posicao", "posição", "position"]),
-        dominantFoot: getValue(row, ["pe_dominante", "pé dominante", "pe dominante", "dominantFoot"]),
-        heightCm: toInt(getValue(row, ["altura", "heightCm", "altura_cm"])),
-        country: getValue(row, ["pais", "país", "country"]),
-        region: getValue(row, ["regiao", "região", "region"]),
-        schoolProject: getValue(row, ["escola", "projeto", "schoolProject"])
-      },
-      create: {
-        accessCode,
-        name,
-        age: toInt(getValue(row, ["idade", "age"])),
-        position: getValue(row, ["posicao", "posição", "position"]),
-        dominantFoot: getValue(row, ["pe_dominante", "pé dominante", "pe dominante", "dominantFoot"]),
-        heightCm: toInt(getValue(row, ["altura", "heightCm", "altura_cm"])),
-        country: getValue(row, ["pais", "país", "country"]),
-        region: getValue(row, ["regiao", "região", "region"]),
-        schoolProject: getValue(row, ["escola", "projeto", "schoolProject"])
-      }
+    const existingAthlete = await findMatchingAthlete({
+      name,
+      age,
+      position,
+      region,
+      explicitAccessCode
     });
+
+    const athleteData = {
+      name,
+      age,
+      position,
+      dominantFoot: getValue(row, ["pe_dominante", "pé dominante", "pe dominante", "dominantFoot"]),
+      heightCm: toInt(getValue(row, ["altura", "heightCm", "altura_cm"])),
+      country: getValue(row, ["pais", "país", "country"]),
+      region,
+      schoolProject: getValue(row, ["escola", "projeto", "schoolProject"])
+    };
+
+    let athlete;
+
+    if (existingAthlete) {
+      athlete = await prisma.athlete.update({
+        where: {
+          id: existingAthlete.id
+        },
+        data: athleteData
+      });
+
+      summary.athletesUpdated++;
+    } else {
+      const accessCode = explicitAccessCode || await generateNextAccessCode();
+
+      athlete = await prisma.athlete.create({
+        data: {
+          accessCode,
+          ...athleteData
+        }
+      });
+
+      summary.athletesCreated++;
+    }
 
     const evaluationData = mapEvaluation(row);
 
-    if (
-      evaluationData.physicalCondition === null &&
-      evaluationData.ballControl === null &&
-      evaluationData.passing === null &&
-      evaluationData.finishing === null &&
-      evaluationData.dribbling === null &&
-      evaluationData.decisionMaking === null &&
-      evaluationData.discipline === null &&
-      evaluationData.goals === null &&
-      evaluationData.assists === null &&
-      evaluationData.accuratePasses === null &&
-      evaluationData.wrongPasses === null
-    ) {
+    if (!hasAnyEvaluationData(evaluationData)) {
       summary.imported++;
       continue;
     }
@@ -172,6 +255,7 @@ export async function importAthletesFromCsv(records) {
     });
 
     summary.imported++;
+    summary.evaluationsCreated++;
   }
 
   return summary;
