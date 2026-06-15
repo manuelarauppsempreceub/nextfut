@@ -16,6 +16,10 @@
           Sou olheiro
         </RouterLink>
 
+        <RouterLink class="button secondary" to="/interesses">
+          Ver interesses
+        </RouterLink>
+
         <RouterLink class="button secondary" to="/importar">
           Importar CSV
         </RouterLink>

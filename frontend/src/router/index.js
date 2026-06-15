@@ -5,6 +5,7 @@ import AthleteDetailView from "../views/AthleteDetailView.vue";
 import ScoutDashboardView from "../views/ScoutDashboardView.vue";
 import ImportCsvView from "../views/ImportCsvView.vue";
 import AthletePortalView from "../views/AthletePortalView.vue";
+import ScoutInterestsView from "../views/ScoutInterestsView.vue";
 
 const routes = [
   {
@@ -31,6 +32,11 @@ const routes = [
     path: "/olheiro",
     name: "scout-dashboard",
     component: ScoutDashboardView
+  },
+  {
+    path: "/interesses",
+    name: "scout-interests",
+    component: ScoutInterestsView
   },
   {
     path: "/importar",

@@ -11,6 +11,7 @@
         <RouterLink to="/portal-atleta">Portal do Atleta</RouterLink>
         <RouterLink to="/atletas">Atletas</RouterLink>
         <RouterLink to="/olheiro">Olheiro</RouterLink>
+        <RouterLink to="/interesses">Interesses</RouterLink>
         <RouterLink to="/importar">Importar</RouterLink>
       </nav>
     </header>
