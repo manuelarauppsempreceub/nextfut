@@ -4,12 +4,18 @@ import AthletesView from "../views/AthletesView.vue";
 import AthleteDetailView from "../views/AthleteDetailView.vue";
 import ScoutDashboardView from "../views/ScoutDashboardView.vue";
 import ImportCsvView from "../views/ImportCsvView.vue";
+import AthletePortalView from "../views/AthletePortalView.vue";
 
 const routes = [
   {
     path: "/",
     name: "home",
     component: HomeView
+  },
+  {
+    path: "/portal-atleta",
+    name: "athlete-portal",
+    component: AthletePortalView
   },
   {
     path: "/atletas",

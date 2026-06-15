@@ -8,12 +8,12 @@
       </p>
 
       <div class="hero-actions">
-        <RouterLink class="button" to="/atletas">
-          Ver atletas
+        <RouterLink class="button" to="/portal-atleta">
+          Sou atleta
         </RouterLink>
 
         <RouterLink class="button secondary" to="/olheiro">
-          Painel do olheiro
+          Sou olheiro
         </RouterLink>
 
         <RouterLink class="button secondary" to="/importar">

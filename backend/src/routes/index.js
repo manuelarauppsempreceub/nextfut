@@ -55,6 +55,34 @@ router.get("/athletes", async (req, res) => {
   res.json(athletes);
 });
 
+router.get("/athletes/access-code/:accessCode", async (req, res) => {
+  const athlete = await prisma.athlete.findUnique({
+    where: {
+      accessCode: req.params.accessCode.toUpperCase()
+    },
+    include: {
+      evaluations: {
+        orderBy: {
+          evaluatedAt: "desc"
+        },
+        include: {
+          evaluator: true,
+          performanceResult: true
+        }
+      },
+      scoutInterests: true
+    }
+  });
+
+  if (!athlete) {
+    return res.status(404).json({
+      message: "Atleta não encontrado para este código de acesso"
+    });
+  }
+
+  res.json(athlete);
+});
+
 router.get("/athletes/:id", async (req, res) => {
   const athlete = await prisma.athlete.findUnique({
     where: {

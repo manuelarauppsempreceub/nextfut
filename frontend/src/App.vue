@@ -8,6 +8,7 @@
 
       <nav>
         <RouterLink to="/">Início</RouterLink>
+        <RouterLink to="/portal-atleta">Portal do Atleta</RouterLink>
         <RouterLink to="/atletas">Atletas</RouterLink>
         <RouterLink to="/olheiro">Olheiro</RouterLink>
         <RouterLink to="/importar">Importar</RouterLink>
