@@ -9,6 +9,16 @@ const athlete = ref(null);
 const loading = ref(true);
 const error = ref("");
 
+const interestLoading = ref(false);
+const interestMessage = ref("");
+const interestError = ref("");
+
+const interestForm = ref({
+  scoutName: "",
+  scoutEmail: "",
+  notes: ""
+});
+
 const latestEvaluation = computed(() => {
   return athlete.value?.evaluations?.[0] || null;
 });
@@ -28,6 +38,39 @@ async function loadAthlete() {
     error.value = "Não foi possível carregar o perfil do atleta.";
   } finally {
     loading.value = false;
+  }
+}
+
+async function submitInterest() {
+  if (!interestForm.value.scoutName.trim()) {
+    interestError.value = "Informe o nome do olheiro.";
+    interestMessage.value = "";
+    return;
+  }
+
+  try {
+    interestLoading.value = true;
+    interestError.value = "";
+    interestMessage.value = "";
+
+    await api.post(`/athletes/${athlete.value.id}/scout-interests`, {
+      scoutName: interestForm.value.scoutName,
+      scoutEmail: interestForm.value.scoutEmail,
+      notes: interestForm.value.notes
+    });
+
+    interestMessage.value = "Interesse registrado com sucesso.";
+    interestForm.value = {
+      scoutName: "",
+      scoutEmail: "",
+      notes: ""
+    };
+
+    await loadAthlete();
+  } catch (err) {
+    interestError.value = err.response?.data?.message || "Não foi possível registrar o interesse.";
+  } finally {
+    interestLoading.value = false;
   }
 }
 
@@ -139,6 +182,56 @@ onMounted(loadAthlete);
               </li>
             </ul>
           </div>
+        </div>
+      </section>
+
+      <section class="profile-panel">
+        <p class="eyebrow">Olheiro</p>
+        <h2>Registrar interesse</h2>
+
+        <div class="interest-form">
+          <div class="field">
+            <label>Nome do olheiro</label>
+            <input v-model="interestForm.scoutName" type="text" placeholder="Nome" />
+          </div>
+
+          <div class="field">
+            <label>E-mail</label>
+            <input v-model="interestForm.scoutEmail" type="email" placeholder="email@exemplo.com" />
+          </div>
+
+          <div class="field full">
+            <label>Observação</label>
+            <textarea v-model="interestForm.notes" rows="4" placeholder="Ex: Atleta com bom potencial para avaliação presencial."></textarea>
+          </div>
+
+          <button class="button" :disabled="interestLoading" @click="submitInterest">
+            {{ interestLoading ? "Registrando..." : "Registrar interesse" }}
+          </button>
+        </div>
+
+        <p v-if="interestMessage" class="success">{{ interestMessage }}</p>
+        <p v-if="interestError" class="error">{{ interestError }}</p>
+
+        <div class="interest-list">
+          <h3>Interesses registrados</h3>
+
+          <div v-if="!athlete.scoutInterests?.length" class="empty">
+            Nenhum interesse registrado.
+          </div>
+
+          <article v-for="interest in athlete.scoutInterests" :key="interest.id" class="interest-card">
+            <div>
+              <strong>{{ interest.scoutName }}</strong>
+              <p>{{ interest.scoutEmail || "E-mail não informado" }}</p>
+            </div>
+
+            <span class="badge">{{ interest.status }}</span>
+
+            <p v-if="interest.notes" class="interest-notes">
+              {{ interest.notes }}
+            </p>
+          </article>
         </div>
       </section>
 

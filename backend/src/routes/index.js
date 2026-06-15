@@ -48,6 +48,11 @@ router.get("/athletes", async (req, res) => {
         include: {
           performanceResult: true
         }
+      },
+      scoutInterests: {
+        orderBy: {
+          createdAt: "desc"
+        }
       }
     }
   });
@@ -98,7 +103,11 @@ router.get("/athletes/:id", async (req, res) => {
           performanceResult: true
         }
       },
-      scoutInterests: true
+      scoutInterests: {
+        orderBy: {
+          createdAt: "desc"
+        }
+      }
     }
   });
 
@@ -109,6 +118,58 @@ router.get("/athletes/:id", async (req, res) => {
   }
 
   res.json(athlete);
+});
+
+router.post("/athletes/:id/scout-interests", async (req, res) => {
+  const athlete = await prisma.athlete.findUnique({
+    where: {
+      id: req.params.id
+    }
+  });
+
+  if (!athlete) {
+    return res.status(404).json({
+      message: "Atleta não encontrado"
+    });
+  }
+
+  const scoutName = String(req.body.scoutName || "").trim();
+  const scoutEmail = String(req.body.scoutEmail || "").trim();
+  const notes = String(req.body.notes || "").trim();
+
+  if (!scoutName) {
+    return res.status(400).json({
+      message: "Nome do olheiro é obrigatório"
+    });
+  }
+
+  const interest = await prisma.scoutInterest.create({
+    data: {
+      athleteId: athlete.id,
+      scoutName,
+      scoutEmail: scoutEmail || null,
+      notes: notes || null,
+      status: "INTERESTED"
+    }
+  });
+
+  res.status(201).json({
+    message: "Interesse registrado com sucesso",
+    interest
+  });
+});
+
+router.get("/scout-interests", async (req, res) => {
+  const interests = await prisma.scoutInterest.findMany({
+    orderBy: {
+      createdAt: "desc"
+    },
+    include: {
+      athlete: true
+    }
+  });
+
+  res.json(interests);
 });
 
 export default router;
