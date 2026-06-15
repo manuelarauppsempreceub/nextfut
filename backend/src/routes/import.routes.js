@@ -2,6 +2,7 @@
 import multer from "multer";
 import fs from "fs";
 import { parse } from "csv-parse/sync";
+import { importAthletesFromCsv } from "../services/csv-import.service.js";
 
 const router = Router();
 
@@ -29,16 +30,18 @@ router.post("/csv", upload.single("file"), async (req, res) => {
     fs.unlinkSync(req.file.path);
 
     const columns = records.length > 0 ? Object.keys(records[0]) : [];
+    const importSummary = await importAthletesFromCsv(records);
 
     res.json({
-      message: "CSV recebido e lido com sucesso",
+      message: "CSV importado com sucesso",
       file: {
         originalName: req.file.originalname,
         size: req.file.size
       },
       summary: {
         rows: records.length,
-        columns
+        columns,
+        ...importSummary
       },
       preview: records.slice(0, 3)
     });
