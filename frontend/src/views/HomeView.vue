@@ -15,6 +15,10 @@
         <RouterLink class="button secondary" to="/olheiro">
           Painel do olheiro
         </RouterLink>
+
+        <RouterLink class="button secondary" to="/importar">
+          Importar CSV
+        </RouterLink>
       </div>
     </div>
   </section>

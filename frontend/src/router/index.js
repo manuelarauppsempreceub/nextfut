@@ -3,6 +3,7 @@ import HomeView from "../views/HomeView.vue";
 import AthletesView from "../views/AthletesView.vue";
 import AthleteDetailView from "../views/AthleteDetailView.vue";
 import ScoutDashboardView from "../views/ScoutDashboardView.vue";
+import ImportCsvView from "../views/ImportCsvView.vue";
 
 const routes = [
   {
@@ -24,6 +25,11 @@ const routes = [
     path: "/olheiro",
     name: "scout-dashboard",
     component: ScoutDashboardView
+  },
+  {
+    path: "/importar",
+    name: "import-csv",
+    component: ImportCsvView
   }
 ];
 
