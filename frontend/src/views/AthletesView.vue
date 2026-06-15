@@ -1,5 +1,6 @@
 ﻿<script setup>
 import { onMounted, ref } from "vue";
+import { RouterLink } from "vue-router";
 import { api } from "../services/api";
 
 const athletes = ref([]);
@@ -79,6 +80,10 @@ onMounted(loadAthletes);
           <p><strong>Pontos fortes:</strong> {{ latestPerformance(athlete).strengths.join(", ") }}</p>
           <p><strong>Pontos fracos:</strong> {{ latestPerformance(athlete).weaknesses.join(", ") }}</p>
         </div>
+
+        <RouterLink class="button card-action" :to="`/atletas/${athlete.id}`">
+          Ver perfil completo
+        </RouterLink>
       </article>
     </div>
   </section>
