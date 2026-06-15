@@ -31,4 +31,53 @@ router.get("/db-health", async (req, res) => {
   }
 });
 
+router.get("/athletes", async (req, res) => {
+  const athletes = await prisma.athlete.findMany({
+    orderBy: {
+      createdAt: "desc"
+    },
+    include: {
+      evaluations: {
+        orderBy: {
+          evaluatedAt: "desc"
+        },
+        take: 1,
+        include: {
+          performanceResult: true
+        }
+      }
+    }
+  });
+
+  res.json(athletes);
+});
+
+router.get("/athletes/:id", async (req, res) => {
+  const athlete = await prisma.athlete.findUnique({
+    where: {
+      id: req.params.id
+    },
+    include: {
+      evaluations: {
+        orderBy: {
+          evaluatedAt: "desc"
+        },
+        include: {
+          evaluator: true,
+          performanceResult: true
+        }
+      },
+      scoutInterests: true
+    }
+  });
+
+  if (!athlete) {
+    return res.status(404).json({
+      message: "Atleta não encontrado"
+    });
+  }
+
+  res.json(athlete);
+});
+
 export default router;

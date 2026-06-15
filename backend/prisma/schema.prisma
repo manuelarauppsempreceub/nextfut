@@ -6,8 +6,173 @@ datasource db {
   provider = "postgresql"
 }
 
+enum AthleteStatus {
+  ACTIVE
+  INACTIVE
+}
+
+enum EvaluatorType {
+  COACH
+  SCOUT
+  PHYSICAL_TRAINER
+  DIRECTOR
+  RESPONSIBLE
+  OBSERVER
+  OTHER
+}
+
+enum PlayerLevel {
+  LOW
+  MEDIUM
+  HIGH
+}
+
+enum EvaluationSource {
+  MANUAL
+  CSV_IMPORT
+  API
+}
+
+enum ScoutInterestStatus {
+  INTERESTED
+  CONTACTED
+  DISCARDED
+}
+
 model HealthCheck {
   id        Int      @id @default(autoincrement())
   status    String   @default("ok")
   createdAt DateTime @default(now())
+}
+
+model Athlete {
+  id            String        @id @default(uuid())
+  accessCode    String        @unique
+  name          String
+  birthDate     DateTime?
+  age           Int?
+  position      String?
+  dominantFoot  String?
+  heightCm      Int?
+  country       String?
+  region        String?
+  schoolProject String?
+  status        AthleteStatus @default(ACTIVE)
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
+
+  evaluations    Evaluation[]
+  scoutInterests ScoutInterest[]
+
+  @@index([name])
+  @@index([position])
+  @@index([region])
+  @@map("athletes")
+}
+
+model Evaluator {
+  id                  String        @id @default(uuid())
+  name                String
+  email               String?
+  relationWithAthlete String?
+  type                EvaluatorType @default(OTHER)
+  createdAt           DateTime      @default(now())
+  updatedAt           DateTime      @updatedAt
+
+  evaluations Evaluation[]
+
+  @@index([name])
+  @@index([email])
+  @@map("evaluators")
+}
+
+model Evaluation {
+  id          String           @id @default(uuid())
+  athleteId   String
+  evaluatorId String?
+  evaluatedAt DateTime         @default(now())
+  source      EvaluationSource @default(MANUAL)
+
+  physicalCondition Int?
+  ballControl       Int?
+  passing           Int?
+  finishing         Int?
+  dribbling         Int?
+  decisionMaking    Int?
+  discipline        Int?
+
+  goals              Int?
+  assists            Int?
+  accuratePasses     Int?
+  wrongPasses        Int?
+  tackles            Int?
+  fouls              Int?
+  shotsOnTarget      Int?
+  minutesPlayed      Int?
+  games              Int?
+  successfulDribbles Int?
+  duelsWon           Int?
+  recoveries         Int?
+
+  approved   Boolean?
+  finalGrade Float?
+  level      PlayerLevel?
+  potential  Int?
+  notes      String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  athlete           Athlete            @relation(fields: [athleteId], references: [id], onDelete: Cascade)
+  evaluator         Evaluator?         @relation(fields: [evaluatorId], references: [id], onDelete: SetNull)
+  performanceResult PerformanceResult?
+
+  @@index([athleteId])
+  @@index([evaluatorId])
+  @@index([level])
+  @@index([approved])
+  @@map("evaluations")
+}
+
+model PerformanceResult {
+  id           String @id @default(uuid())
+  evaluationId String @unique
+
+  performanceScore      Float
+  calculatedLevel       PlayerLevel
+  passAccuracyRate      Float?
+  offensiveEfficiency   Float?
+  disciplinaryIndex     Float?
+  averageTechnicalScore Float?
+
+  strengths       String[]
+  weaknesses      String[]
+  recommendations String[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  evaluation Evaluation @relation(fields: [evaluationId], references: [id], onDelete: Cascade)
+
+  @@index([performanceScore])
+  @@index([calculatedLevel])
+  @@map("performance_results")
+}
+
+model ScoutInterest {
+  id         String              @id @default(uuid())
+  athleteId  String
+  scoutName  String
+  scoutEmail String?
+  status     ScoutInterestStatus @default(INTERESTED)
+  notes      String?
+  createdAt  DateTime            @default(now())
+  updatedAt  DateTime            @updatedAt
+
+  athlete Athlete @relation(fields: [athleteId], references: [id], onDelete: Cascade)
+
+  @@index([athleteId])
+  @@index([scoutName])
+  @@index([status])
+  @@map("scout_interests")
 }
