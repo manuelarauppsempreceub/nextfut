@@ -7,9 +7,15 @@
         MVP para cadastro, importação e análise de desempenho de jogadores de futebol.
       </p>
 
-      <RouterLink class="button" to="/atletas">
-        Ver atletas
-      </RouterLink>
+      <div class="hero-actions">
+        <RouterLink class="button" to="/atletas">
+          Ver atletas
+        </RouterLink>
+
+        <RouterLink class="button secondary" to="/olheiro">
+          Painel do olheiro
+        </RouterLink>
+      </div>
     </div>
   </section>
 </template>

@@ -2,6 +2,7 @@
 import HomeView from "../views/HomeView.vue";
 import AthletesView from "../views/AthletesView.vue";
 import AthleteDetailView from "../views/AthleteDetailView.vue";
+import ScoutDashboardView from "../views/ScoutDashboardView.vue";
 
 const routes = [
   {
@@ -18,6 +19,11 @@ const routes = [
     path: "/atletas/:id",
     name: "athlete-detail",
     component: AthleteDetailView
+  },
+  {
+    path: "/olheiro",
+    name: "scout-dashboard",
+    component: ScoutDashboardView
   }
 ];
 

@@ -9,6 +9,7 @@
       <nav>
         <RouterLink to="/">Início</RouterLink>
         <RouterLink to="/atletas">Atletas</RouterLink>
+        <RouterLink to="/olheiro">Olheiro</RouterLink>
       </nav>
     </header>
 
