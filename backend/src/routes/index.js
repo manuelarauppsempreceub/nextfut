@@ -1,7 +1,10 @@
 ﻿import { Router } from "express";
 import prisma from "../database/prisma.js";
+import importRoutes from "./import.routes.js";
 
 const router = Router();
+
+router.use("/import", importRoutes);
 
 router.get("/health", (req, res) => {
   res.json({

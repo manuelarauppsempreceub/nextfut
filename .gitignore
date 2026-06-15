@@ -7,3 +7,8 @@ build
 coverage
 .prisma
 *.log
+
+# Uploads temporários
+backend/uploads
+'
+
