@@ -1,4 +1,4 @@
-﻿services:
+services:
   postgres:
     image: postgres:16
     container_name: nextfut-postgres
@@ -35,7 +35,7 @@
     depends_on:
       postgres:
         condition: service_healthy
-    command: npm run dev
+    command: sh -c "npx prisma generate && npx prisma migrate deploy && npm run dev"
 
   frontend:
     build:
@@ -49,7 +49,7 @@
       - /app/node_modules
     depends_on:
       - backend
-    command: npm run dev
+    command: npm run dev -- --host 0.0.0.0
 
 volumes:
   nextfut_postgres_data:
