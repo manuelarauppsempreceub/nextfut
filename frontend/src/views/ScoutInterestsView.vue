@@ -6,6 +6,9 @@ import { api } from "../services/api";
 const interests = ref([]);
 const loading = ref(true);
 const error = ref("");
+const actionMessage = ref("");
+const actionError = ref("");
+const updatingId = ref("");
 
 const search = ref("");
 const status = ref("");
@@ -21,6 +24,25 @@ async function loadInterests() {
     error.value = "Não foi possível carregar os interesses dos olheiros.";
   } finally {
     loading.value = false;
+  }
+}
+
+async function updateInterestStatus(interestId, newStatus) {
+  try {
+    updatingId.value = interestId;
+    actionMessage.value = "";
+    actionError.value = "";
+
+    await api.patch(`/scout-interests/${interestId}/status`, {
+      status: newStatus
+    });
+
+    actionMessage.value = "Status atualizado com sucesso.";
+    await loadInterests();
+  } catch (err) {
+    actionError.value = err.response?.data?.message || "Não foi possível atualizar o status.";
+  } finally {
+    updatingId.value = "";
   }
 }
 
@@ -90,6 +112,9 @@ onMounted(loadInterests);
     <p v-else-if="error" class="error">{{ error }}</p>
 
     <template v-else>
+      <p v-if="actionMessage" class="success">{{ actionMessage }}</p>
+      <p v-if="actionError" class="error">{{ actionError }}</p>
+
       <section class="filters-panel interests-filters">
         <div class="field">
           <label>Buscar</label>
@@ -156,13 +181,39 @@ onMounted(loadInterests);
             {{ interest.notes }}
           </p>
 
-          <RouterLink
-            v-if="interest.athlete?.id"
-            class="button card-action"
-            :to="`/atletas/${interest.athlete.id}`"
-          >
-            Ver perfil do atleta
-          </RouterLink>
+          <div class="interest-actions">
+            <button
+              class="button secondary"
+              :disabled="updatingId === interest.id || interest.status === 'INTERESTED'"
+              @click="updateInterestStatus(interest.id, 'INTERESTED')"
+            >
+              Interessado
+            </button>
+
+            <button
+              class="button secondary"
+              :disabled="updatingId === interest.id || interest.status === 'CONTACTED'"
+              @click="updateInterestStatus(interest.id, 'CONTACTED')"
+            >
+              Contatado
+            </button>
+
+            <button
+              class="button secondary danger"
+              :disabled="updatingId === interest.id || interest.status === 'DISCARDED'"
+              @click="updateInterestStatus(interest.id, 'DISCARDED')"
+            >
+              Descartado
+            </button>
+
+            <RouterLink
+              v-if="interest.athlete?.id"
+              class="button"
+              :to="`/atletas/${interest.athlete.id}`"
+            >
+              Ver perfil
+            </RouterLink>
+          </div>
         </article>
       </div>
     </template>

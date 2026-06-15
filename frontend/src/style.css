@@ -798,3 +798,18 @@ button:disabled {
     grid-template-columns: 1fr;
   }
 }
+
+.interest-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  border-top: 1px solid #edf1ee;
+  margin-top: 14px;
+  padding-top: 14px;
+}
+
+.button.danger {
+  color: #b42318;
+  border-color: #f4c7c3;
+  background: #fff5f5;
+}

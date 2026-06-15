@@ -172,4 +172,45 @@ router.get("/scout-interests", async (req, res) => {
   res.json(interests);
 });
 
+router.patch("/scout-interests/:id/status", async (req, res) => {
+  const allowedStatuses = ["INTERESTED", "CONTACTED", "DISCARDED"];
+  const status = String(req.body.status || "").trim().toUpperCase();
+
+  if (!allowedStatuses.includes(status)) {
+    return res.status(400).json({
+      message: "Status inválido",
+      allowedStatuses
+    });
+  }
+
+  const existingInterest = await prisma.scoutInterest.findUnique({
+    where: {
+      id: req.params.id
+    }
+  });
+
+  if (!existingInterest) {
+    return res.status(404).json({
+      message: "Interesse não encontrado"
+    });
+  }
+
+  const interest = await prisma.scoutInterest.update({
+    where: {
+      id: req.params.id
+    },
+    data: {
+      status
+    },
+    include: {
+      athlete: true
+    }
+  });
+
+  res.json({
+    message: "Status do interesse atualizado com sucesso",
+    interest
+  });
+});
+
 export default router;
