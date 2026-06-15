@@ -34,6 +34,86 @@ router.get("/db-health", async (req, res) => {
   }
 });
 
+router.get("/dashboard/summary", async (req, res) => {
+  const [
+    totalAthletes,
+    totalEvaluations,
+    totalInterests,
+    performanceResults,
+    latestAthletes,
+    latestInterests
+  ] = await Promise.all([
+    prisma.athlete.count(),
+    prisma.evaluation.count(),
+    prisma.scoutInterest.count(),
+    prisma.performanceResult.findMany({
+      select: {
+        performanceScore: true,
+        calculatedLevel: true
+      }
+    }),
+    prisma.athlete.findMany({
+      orderBy: {
+        createdAt: "desc"
+      },
+      take: 5,
+      include: {
+        evaluations: {
+          orderBy: {
+            evaluatedAt: "desc"
+          },
+          take: 1,
+          include: {
+            performanceResult: true
+          }
+        }
+      }
+    }),
+    prisma.scoutInterest.findMany({
+      orderBy: {
+        createdAt: "desc"
+      },
+      take: 5,
+      include: {
+        athlete: true
+      }
+    })
+  ]);
+
+  const scoreValues = performanceResults
+    .map((item) => item.performanceScore)
+    .filter((score) => typeof score === "number");
+
+  const averageScore = scoreValues.length
+    ? Number((scoreValues.reduce((sum, score) => sum + score, 0) / scoreValues.length).toFixed(1))
+    : null;
+
+  const athletesByLevel = {
+    HIGH: performanceResults.filter((item) => item.calculatedLevel === "HIGH").length,
+    MEDIUM: performanceResults.filter((item) => item.calculatedLevel === "MEDIUM").length,
+    LOW: performanceResults.filter((item) => item.calculatedLevel === "LOW").length
+  };
+
+  const interestsByStatus = {
+    INTERESTED: await prisma.scoutInterest.count({ where: { status: "INTERESTED" } }),
+    CONTACTED: await prisma.scoutInterest.count({ where: { status: "CONTACTED" } }),
+    DISCARDED: await prisma.scoutInterest.count({ where: { status: "DISCARDED" } })
+  };
+
+  res.json({
+    totals: {
+      athletes: totalAthletes,
+      evaluations: totalEvaluations,
+      interests: totalInterests,
+      averageScore
+    },
+    athletesByLevel,
+    interestsByStatus,
+    latestAthletes,
+    latestInterests
+  });
+});
+
 router.get("/athletes", async (req, res) => {
   const athletes = await prisma.athlete.findMany({
     orderBy: {
