@@ -1,22 +1,22 @@
 ﻿services:
   postgres:
     image: postgres:16
-    container_name: nexfut-postgres
+    container_name: nextfut-postgres
     restart: unless-stopped
     environment:
-      POSTGRES_USER: nexfut
-      POSTGRES_PASSWORD: nexfut
-      POSTGRES_DB: nexfut
+      POSTGRES_USER: nextfut
+      POSTGRES_PASSWORD: nextfut
+      POSTGRES_DB: nextfut
     ports:
       - "5432:5432"
     volumes:
-      - nexfut_postgres_data:/var/lib/postgresql/data
+      - nextfut_postgres_data:/var/lib/postgresql/data
       - ./infra/postgres/init:/docker-entrypoint-initdb.d
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U nexfut -d nexfut"]
+      test: ["CMD-SHELL", "pg_isready -U nextfut -d nextfut"]
       interval: 10s
       timeout: 5s
       retries: 5
 
 volumes:
-  nexfut_postgres_data:
+  nextfut_postgres_data:

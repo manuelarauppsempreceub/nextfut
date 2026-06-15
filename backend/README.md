@@ -1,6 +1,6 @@
-﻿# NexFut Backend
+﻿# NextFut Backend
 
-Backend da plataforma NexFut.
+Backend da plataforma NextFut.
 
 ## Stack
 
@@ -17,3 +17,19 @@ Backend da plataforma NexFut.
 - Cálculo de score
 - Recomendações de treino
 - Importação CSV
+
+## Desenvolvimento
+
+Instalar dependências:
+
+npm install
+
+Rodar em desenvolvimento:
+
+npm run dev
+
+Acessar healthcheck:
+
+http://localhost:3000/api/health
+
+

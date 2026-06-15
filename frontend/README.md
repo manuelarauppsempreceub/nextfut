@@ -1,6 +1,6 @@
-﻿# NexFut Frontend
+﻿# NextFut Frontend
 
-Frontend da plataforma NexFut.
+Frontend da plataforma NextFut.
 
 ## Stack
 
@@ -16,3 +16,4 @@ Frontend da plataforma NexFut.
 - Perfil do atleta
 - Painel do olheiro
 - Importação de CSV
+

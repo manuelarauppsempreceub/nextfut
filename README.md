@@ -1,10 +1,10 @@
-﻿# NexFut
+﻿# NextFut
 
 Sistema web para avaliação, acompanhamento e scouting de jogadores de futebol.
 
 ## Objetivo
 
-A NexFut é uma plataforma simples para conectar atletas, avaliadores e olheiros, permitindo:
+A NextFut é uma plataforma simples para conectar atletas, avaliadores e olheiros, permitindo:
 
 - cadastro e consulta de atletas;
 - registro de avaliações;
@@ -23,7 +23,7 @@ A NexFut é uma plataforma simples para conectar atletas, avaliadores e olheiros
 
 ## Estrutura inicial
 
-nexfut/
+NextFut/
   backend/
   frontend/
   infra/
@@ -43,3 +43,4 @@ nexfut/
 8. Frontend Vue base
 9. Portal do atleta
 10. Painel do olheiro
+

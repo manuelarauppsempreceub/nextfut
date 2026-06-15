@@ -1,4 +1,4 @@
-﻿# Infraestrutura NexFut
+﻿# Infraestrutura NextFut
 
 Esta pasta concentra arquivos de infraestrutura local.
 
@@ -13,9 +13,9 @@ Configuração padrão:
 
 - Host: localhost
 - Porta: 5432
-- Database: nexfut
-- User: nexfut
-- Password: nexfut
+- Database: NextFut
+- User: NextFut
+- Password: NextFut
 
 ## Subir ambiente
 
@@ -38,3 +38,4 @@ docker compose down
 Use apenas se quiser recriar o banco do zero:
 
 docker compose down -v
+

@@ -1,4 +1,4 @@
-﻿# Documento Técnico — NexFut
+﻿# Documento Técnico — NextFut
 
 ## Stack
 
@@ -36,3 +36,4 @@ Criar um sistema simples para avaliação de jogadores de futebol, permitindo:
 - Cada avaliação deve ter ID único e timestamp.
 - O score deve ser calculado de forma explicável.
 - O sistema deve rodar localmente com Docker Compose.
+
