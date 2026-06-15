@@ -37,3 +37,4 @@ Criar um sistema simples para avaliação de jogadores de futebol, permitindo:
 - O score deve ser calculado de forma explicável.
 - O sistema deve rodar localmente com Docker Compose.
 
+

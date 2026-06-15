@@ -11,10 +11,11 @@ app.use("/api", routes);
 
 app.get("/", (req, res) => {
   res.json({
-    app: "NexFut API",
+    app: "NextFut API",
     status: "online",
-    message: "Backend NexFut em execução"
+    message: "Backend NextFut em execução"
   });
 });
 
 export default app;
+
