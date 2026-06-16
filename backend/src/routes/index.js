@@ -1,10 +1,12 @@
 import { Router } from "express";
 import prisma from "../database/prisma.js";
 import importRoutes from "./import.routes.js";
+import evaluationRoutes from "./evaluation.routes.js";
 
 const router = Router();
 
 router.use("/import", importRoutes);
+router.use(evaluationRoutes);
 
 function normalizeText(value) {
   return String(value || "").trim();
