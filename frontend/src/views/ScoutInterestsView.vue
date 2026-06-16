@@ -1,5 +1,5 @@
-﻿<script setup>
-import { computed, onMounted, ref } from "vue";
+<script setup>
+import { computed, onMounted, ref, watch } from "vue";
 import { RouterLink } from "vue-router";
 import { api } from "../services/api";
 
@@ -12,6 +12,8 @@ const updatingId = ref("");
 
 const search = ref("");
 const status = ref("");
+const currentPage = ref(1);
+const pageSize = ref(10);
 
 async function loadInterests() {
   try {
@@ -84,6 +86,29 @@ const filteredInterests = computed(() => {
   });
 });
 
+const totalRecords = computed(() => filteredInterests.value.length);
+const totalPages = computed(() => Math.max(1, Math.ceil(totalRecords.value / pageSize.value)));
+const paginatedInterests = computed(() => {
+  const start = (currentPage.value - 1) * pageSize.value;
+  return filteredInterests.value.slice(start, start + pageSize.value);
+});
+const pageStart = computed(() => (totalRecords.value ? (currentPage.value - 1) * pageSize.value + 1 : 0));
+const pageEnd = computed(() => Math.min(currentPage.value * pageSize.value, totalRecords.value));
+
+function goToPage(page) {
+  currentPage.value = Math.min(Math.max(page, 1), totalPages.value);
+}
+
+watch([search, status, pageSize], () => {
+  currentPage.value = 1;
+});
+
+watch(totalPages, () => {
+  if (currentPage.value > totalPages.value) {
+    currentPage.value = totalPages.value;
+  }
+});
+
 function clearFilters() {
   search.value = "";
   status.value = "";
@@ -115,7 +140,7 @@ onMounted(loadInterests);
       <p v-if="actionMessage" class="success">{{ actionMessage }}</p>
       <p v-if="actionError" class="error">{{ actionError }}</p>
 
-      <section class="filters-panel interests-filters">
+      <section class="filters-panel interests-filters filters-panel-list">
         <div class="field">
           <label>Buscar</label>
           <input v-model="search" type="text" placeholder="Atleta, código, olheiro ou e-mail" />
@@ -136,17 +161,21 @@ onMounted(loadInterests);
         </button>
       </section>
 
+      <div class="list-header-row">
+        <p class="list-counter">{{ totalRecords }} interesse(s) encontrado(s)</p>
+      </div>
+
       <div v-if="!filteredInterests.length" class="empty">
         Nenhum interesse encontrado.
       </div>
 
-      <div v-else class="interest-dashboard-list">
+      <div v-else class="interest-dashboard-list standardized-list">
         <article
-          v-for="interest in filteredInterests"
+          v-for="interest in paginatedInterests"
           :key="interest.id"
-          class="interest-dashboard-card"
+          class="interest-dashboard-card standardized-card"
         >
-          <div class="interest-dashboard-main">
+          <div class="interest-dashboard-main standardized-card-main">
             <div>
               <span class="badge">{{ statusLabel(interest.status) }}</span>
               <h2>{{ interest.athlete?.name || "Atleta não informado" }}</h2>
@@ -181,41 +210,65 @@ onMounted(loadInterests);
             {{ interest.notes }}
           </p>
 
-          <div class="interest-actions">
+          <div class="interest-actions end">
             <button
-              class="button secondary"
+              class="button secondary compact action-icon-button"
               :disabled="updatingId === interest.id || interest.status === 'INTERESTED'"
               @click="updateInterestStatus(interest.id, 'INTERESTED')"
             >
-              Interessado
+              <span>Interessado</span>
+              <span class="button-icon">●</span>
             </button>
 
             <button
-              class="button secondary"
+              class="button secondary compact action-icon-button"
               :disabled="updatingId === interest.id || interest.status === 'CONTACTED'"
               @click="updateInterestStatus(interest.id, 'CONTACTED')"
             >
-              Contatado
+              <span>Contatado</span>
+              <span class="button-icon">✓</span>
             </button>
 
             <button
-              class="button secondary danger"
+              class="button secondary danger compact action-icon-button"
               :disabled="updatingId === interest.id || interest.status === 'DISCARDED'"
               @click="updateInterestStatus(interest.id, 'DISCARDED')"
             >
-              Descartado
+              <span>Descartado</span>
+              <span class="button-icon">×</span>
             </button>
 
             <RouterLink
               v-if="interest.athlete?.id"
-              class="button"
+              class="button compact action-icon-button"
               :to="`/atletas/${interest.athlete.id}`"
             >
-              Ver perfil
+              <span>Ver perfil</span>
+              <span class="button-icon">↗</span>
             </RouterLink>
           </div>
         </article>
       </div>
+
+      <footer v-if="totalRecords" class="list-footer standalone">
+        <div>
+          Exibindo {{ pageStart }}–{{ pageEnd }} de {{ totalRecords }} registro(s)
+        </div>
+
+        <div class="pagination-controls">
+          <label>
+            Itens por página
+            <select v-model.number="pageSize">
+              <option :value="5">5</option>
+              <option :value="10">10</option>
+              <option :value="20">20</option>
+            </select>
+          </label>
+          <button class="button secondary compact" type="button" :disabled="currentPage === 1" @click="goToPage(currentPage - 1)">Anterior</button>
+          <span>Página {{ currentPage }} de {{ totalPages }}</span>
+          <button class="button secondary compact" type="button" :disabled="currentPage === totalPages" @click="goToPage(currentPage + 1)">Próxima</button>
+        </div>
+      </footer>
     </template>
   </section>
 </template>

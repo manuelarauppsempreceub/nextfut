@@ -126,7 +126,7 @@ async function submitAthleteEdit() {
 
     await loadAthlete();
   } catch (err) {
-    editError.value = err.response?.data?.message || "Nao foi possivel atualizar o atleta.";
+    editError.value = err.response?.data?.message || "Não foi possível atualizar o atleta.";
   } finally {
     editLoading.value = false;
   }
@@ -140,7 +140,7 @@ async function loadAthlete() {
     const response = await api.get(`/athletes/${route.params.id}`);
     athlete.value = response.data;
   } catch (err) {
-    error.value = "Nao foi possivel carregar o perfil do atleta.";
+    error.value = "Não foi possível carregar o perfil do atleta.";
   } finally {
     loading.value = false;
   }
@@ -163,7 +163,7 @@ async function submitEvaluation() {
   const hasData = Object.values(payload).some((value) => value !== null);
 
   if (!hasData) {
-    evaluationError.value = "Informe ao menos um dado de avaliacao.";
+    evaluationError.value = "Informe ao menos um dado de avaliação.";
     evaluationMessage.value = "";
     return;
   }
@@ -175,13 +175,13 @@ async function submitEvaluation() {
 
     await api.post(`/athletes/${athlete.value.id}/evaluations`, payload);
 
-    evaluationMessage.value = "Avaliacao cadastrada com sucesso.";
+    evaluationMessage.value = "Avaliação cadastrada com sucesso.";
     evaluationForm.value = emptyEvaluationForm();
     showEvaluationForm.value = false;
 
     await loadAthlete();
   } catch (err) {
-    evaluationError.value = err.response?.data?.message || "Nao foi possivel cadastrar a avaliacao.";
+    evaluationError.value = err.response?.data?.message || "Não foi possível cadastrar a avaliação.";
   } finally {
     evaluationLoading.value = false;
   }
@@ -214,7 +214,7 @@ async function submitInterest() {
 
     await loadAthlete();
   } catch (err) {
-    interestError.value = err.response?.data?.message || "Nao foi possivel registrar o interesse.";
+    interestError.value = err.response?.data?.message || "Não foi possível registrar o interesse.";
   } finally {
     interestLoading.value = false;
   }
@@ -260,9 +260,9 @@ onMounted(loadAthlete);
             <p class="eyebrow">Perfil do atleta</p>
             <h1>{{ athlete.name }}</h1>
             <p>
-              {{ athlete.position || "Posicao nao informada" }}
+              {{ athlete.position || "Posição nao informada" }}
               &middot;
-              {{ athlete.region || "Regiao nao informada" }}
+              {{ athlete.region || "Região nao informada" }}
             </p>
           </div>
 
@@ -275,62 +275,33 @@ onMounted(loadAthlete);
           </div>
         </div>
 
-        <form v-if="showEditForm" class="athlete-edit-form" @submit.prevent="submitAthleteEdit">
-          <div class="field full">
-            <label>Nome do atleta *</label>
-            <input v-model="editForm.name" type="text" />
-          </div>
-
-          <div class="field">
-            <label>Idade</label>
-            <input v-model="editForm.age" type="number" min="0" />
-          </div>
-
-          <div class="field">
-            <label>Posicao</label>
-            <input v-model="editForm.position" type="text" />
-          </div>
-
-          <div class="field">
-            <label>Pe dominante</label>
-            <select v-model="editForm.dominantFoot">
-              <option value="">Nao informado</option>
-              <option value="Direito">Direito</option>
-              <option value="Esquerdo">Esquerdo</option>
-              <option value="Ambidestro">Ambidestro</option>
-            </select>
-          </div>
-
-          <div class="field">
-            <label>Altura em cm</label>
-            <input v-model="editForm.heightCm" type="number" min="0" />
-          </div>
-
-          <div class="field">
-            <label>Pais</label>
-            <input v-model="editForm.country" type="text" />
-          </div>
-
-          <div class="field">
-            <label>Regiao</label>
-            <input v-model="editForm.region" type="text" />
-          </div>
-
-          <div class="field full">
-            <label>Escola ou projeto</label>
-            <input v-model="editForm.schoolProject" type="text" />
-          </div>
-
-          <div class="form-actions full">
-            <button class="button" type="submit" :disabled="editLoading">
-              {{ editLoading ? "Salvando..." : "Salvar alteracoes" }}
-            </button>
-
-            <button class="button secondary" type="button" @click="showEditForm = false">
-              Cancelar
-            </button>
-          </div>
-        </form>
+        <div v-if="showEditForm" class="modal-backdrop">
+          <section class="modal-card" role="dialog" aria-modal="true">
+            <header class="modal-header">
+              <div>
+                <p class="eyebrow">Edição cadastral</p>
+                <h2>Editar atleta</h2>
+              </div>
+              <button class="modal-close" type="button" @click="showEditForm = false">×</button>
+            </header>
+            <form @submit.prevent="submitAthleteEdit">
+              <div class="modal-body athlete-edit-form">
+                <div class="field full"><label>Nome do atleta *</label><input v-model="editForm.name" type="text" /></div>
+                <div class="field"><label>Idade</label><input v-model="editForm.age" type="number" min="0" /></div>
+                <div class="field"><label>Posição</label><input v-model="editForm.position" type="text" /></div>
+                <div class="field"><label>Pé dominante</label><select v-model="editForm.dominantFoot"><option value="">Não informado</option><option value="Direito">Direito</option><option value="Esquerdo">Esquerdo</option><option value="Ambidestro">Ambidestro</option></select></div>
+                <div class="field"><label>Altura em cm</label><input v-model="editForm.heightCm" type="number" min="0" /></div>
+                <div class="field"><label>País</label><input v-model="editForm.country" type="text" /></div>
+                <div class="field"><label>Região</label><input v-model="editForm.region" type="text" /></div>
+                <div class="field full"><label>Escola ou projeto</label><input v-model="editForm.schoolProject" type="text" /></div>
+              </div>
+              <footer class="modal-actions">
+                <button class="button secondary" type="button" @click="showEditForm = false">Cancelar</button>
+                <button class="button" type="submit" :disabled="editLoading">{{ editLoading ? "Salvando..." : "Salvar alterações" }}</button>
+              </footer>
+            </form>
+          </section>
+        </div>
 
         <p v-if="editMessage" class="success">{{ editMessage }}</p>
         <p v-if="editError" class="error">{{ editError }}</p>
@@ -400,135 +371,57 @@ onMounted(loadAthlete);
       <section class="profile-panel">
         <div class="section-title-row">
           <div>
-            <p class="eyebrow">Avaliacao</p>
-            <h2>Cadastrar avaliacao manual</h2>
+            <p class="eyebrow">Avaliação</p>
+            <h2>Cadastrar avaliação manual</h2>
           </div>
 
           <button class="button secondary" @click="showEvaluationForm = !showEvaluationForm">
-            {{ showEvaluationForm ? "Fechar" : "Nova avaliacao" }}
+            {{ showEvaluationForm ? "Fechar" : "Nova avaliação" }}
           </button>
         </div>
 
-        <form v-if="showEvaluationForm" class="evaluation-form" @submit.prevent="submitEvaluation">
-          <h3>Notas principais</h3>
-
-          <div class="field">
-            <label>Condi&ccedil;&atilde;o f&iacute;sica (0 a 10)</label>
-            <input v-model="evaluationForm.physicalCondition" type="number" min="0" max="10" step="1" />
-          </div>
-
-          <div class="field">
-            <label>Controle de bola (0 a 5)</label>
-            <input v-model="evaluationForm.ballControl" type="number" min="0" max="5" step="1" />
-          </div>
-
-          <div class="field">
-            <label>Passe (0 a 5)</label>
-            <input v-model="evaluationForm.passing" type="number" min="0" max="5" step="1" />
-          </div>
-
-          <div class="field">
-            <label>Finaliza&ccedil;&atilde;o (0 a 5)</label>
-            <input v-model="evaluationForm.finishing" type="number" min="0" max="5" step="1" />
-          </div>
-
-          <div class="field">
-            <label>Drible (0 a 5)</label>
-            <input v-model="evaluationForm.dribbling" type="number" min="0" max="5" step="1" />
-          </div>
-
-          <div class="field">
-            <label>Tomada de decis&atilde;o (0 a 5)</label>
-            <input v-model="evaluationForm.decisionMaking" type="number" min="0" max="5" step="1" />
-          </div>
-
-          <div class="field">
-            <label>Disciplina (0 a 5)</label>
-            <input v-model="evaluationForm.discipline" type="number" min="0" max="5" step="1" />
-          </div>
-
-          <div class="field">
-            <label>Potencial (0 a 5)</label>
-            <input v-model="evaluationForm.potential" type="number" min="0" max="5" step="1" />
-          </div>
-
-          <h3 class="full">Metricas de jogo</h3>
-
-          <div class="field">
-            <label>Gols</label>
-            <input v-model="evaluationForm.goals" type="number" min="0" />
-          </div>
-
-          <div class="field">
-            <label>Assistencias</label>
-            <input v-model="evaluationForm.assists" type="number" min="0" />
-          </div>
-
-          <div class="field">
-            <label>Passes certos</label>
-            <input v-model="evaluationForm.accuratePasses" type="number" min="0" />
-          </div>
-
-          <div class="field">
-            <label>Passes errados</label>
-            <input v-model="evaluationForm.wrongPasses" type="number" min="0" />
-          </div>
-
-          <div class="field">
-            <label>Desarmes</label>
-            <input v-model="evaluationForm.tackles" type="number" min="0" />
-          </div>
-
-          <div class="field">
-            <label>Faltas</label>
-            <input v-model="evaluationForm.fouls" type="number" min="0" />
-          </div>
-
-          <div class="field">
-            <label>Chutes no gol</label>
-            <input v-model="evaluationForm.shotsOnTarget" type="number" min="0" />
-          </div>
-
-          <div class="field">
-            <label>Minutos jogados</label>
-            <input v-model="evaluationForm.minutesPlayed" type="number" min="0" />
-          </div>
-
-          <div class="field">
-            <label>Jogos</label>
-            <input v-model="evaluationForm.games" type="number" min="0" />
-          </div>
-
-          <div class="field">
-            <label>Dribles certos</label>
-            <input v-model="evaluationForm.successfulDribbles" type="number" min="0" />
-          </div>
-
-          <div class="field">
-            <label>Duelos vencidos</label>
-            <input v-model="evaluationForm.duelsWon" type="number" min="0" />
-          </div>
-
-          <div class="field">
-            <label>Recuperacoes</label>
-            <input v-model="evaluationForm.recoveries" type="number" min="0" />
-          </div>
-
-          <div class="field">
-            <label>Nota final</label>
-            <input v-model="evaluationForm.finalGrade" type="number" min="0" max="10" step="0.1" />
-          </div>
-
-          <div class="form-actions full">
-            <button class="button" type="submit" :disabled="evaluationLoading">
-              {{ evaluationLoading ? "Salvando..." : "Salvar avaliacao" }}
-            </button>
-
-            <button class="button secondary" type="button" @click="showEvaluationForm = false">
-              Cancelar
-            </button>
-          </div>
-        </form>
+        <div v-if="showEvaluationForm" class="modal-backdrop">
+          <section class="modal-card large" role="dialog" aria-modal="true">
+            <header class="modal-header">
+              <div>
+                <p class="eyebrow">Avaliação manual</p>
+                <h2>Nova avaliação</h2>
+              </div>
+              <button class="modal-close" type="button" @click="showEvaluationForm = false">×</button>
+            </header>
+            <form @submit.prevent="submitEvaluation">
+              <div class="modal-body evaluation-form">
+                <h3 class="full">Notas principais</h3>
+                <div class="field"><label>Condição física (0 a 10)</label><input v-model="evaluationForm.physicalCondition" type="number" min="0" max="10" step="1" /></div>
+                <div class="field"><label>Controle de bola (0 a 5)</label><input v-model="evaluationForm.ballControl" type="number" min="0" max="5" step="1" /></div>
+                <div class="field"><label>Passe (0 a 5)</label><input v-model="evaluationForm.passing" type="number" min="0" max="5" step="1" /></div>
+                <div class="field"><label>Finalização (0 a 5)</label><input v-model="evaluationForm.finishing" type="number" min="0" max="5" step="1" /></div>
+                <div class="field"><label>Drible (0 a 5)</label><input v-model="evaluationForm.dribbling" type="number" min="0" max="5" step="1" /></div>
+                <div class="field"><label>Tomada de decisão (0 a 5)</label><input v-model="evaluationForm.decisionMaking" type="number" min="0" max="5" step="1" /></div>
+                <div class="field"><label>Disciplina (0 a 5)</label><input v-model="evaluationForm.discipline" type="number" min="0" max="5" step="1" /></div>
+                <div class="field"><label>Potencial (0 a 5)</label><input v-model="evaluationForm.potential" type="number" min="0" max="5" step="1" /></div>
+                <h3 class="full">Métricas de jogo</h3>
+                <div class="field"><label>Gols</label><input v-model="evaluationForm.goals" type="number" min="0" /></div>
+                <div class="field"><label>Assistências</label><input v-model="evaluationForm.assists" type="number" min="0" /></div>
+                <div class="field"><label>Passes certos</label><input v-model="evaluationForm.accuratePasses" type="number" min="0" /></div>
+                <div class="field"><label>Passes errados</label><input v-model="evaluationForm.wrongPasses" type="number" min="0" /></div>
+                <div class="field"><label>Desarmes</label><input v-model="evaluationForm.tackles" type="number" min="0" /></div>
+                <div class="field"><label>Faltas</label><input v-model="evaluationForm.fouls" type="number" min="0" /></div>
+                <div class="field"><label>Chutes no gol</label><input v-model="evaluationForm.shotsOnTarget" type="number" min="0" /></div>
+                <div class="field"><label>Minutos jogados</label><input v-model="evaluationForm.minutesPlayed" type="number" min="0" /></div>
+                <div class="field"><label>Jogos</label><input v-model="evaluationForm.games" type="number" min="0" /></div>
+                <div class="field"><label>Dribles certos</label><input v-model="evaluationForm.successfulDribbles" type="number" min="0" /></div>
+                <div class="field"><label>Duelos vencidos</label><input v-model="evaluationForm.duelsWon" type="number" min="0" /></div>
+                <div class="field"><label>Recuperações</label><input v-model="evaluationForm.recoveries" type="number" min="0" /></div>
+                <div class="field"><label>Nota final</label><input v-model="evaluationForm.finalGrade" type="number" min="0" max="10" step="0.1" /></div>
+              </div>
+              <footer class="modal-actions">
+                <button class="button secondary" type="button" @click="showEvaluationForm = false">Cancelar</button>
+                <button class="button" type="submit" :disabled="evaluationLoading">{{ evaluationLoading ? "Salvando..." : "Salvar avaliação" }}</button>
+              </footer>
+            </form>
+          </section>
+        </div>
 
         <p v-if="evaluationMessage" class="success">{{ evaluationMessage }}</p>
         <p v-if="evaluationError" class="error">{{ evaluationError }}</p>
@@ -551,7 +444,7 @@ onMounted(loadAthlete);
 
           <div class="field full">
             <label>Observacao</label>
-            <textarea v-model="interestForm.notes" rows="4" placeholder="Ex: Atleta com bom potencial para avaliacao presencial."></textarea>
+            <textarea v-model="interestForm.notes" rows="4" placeholder="Ex: Atleta com bom potencial para avaliação presencial."></textarea>
           </div>
 
           <button class="button" :disabled="interestLoading" @click="submitInterest">
@@ -585,11 +478,11 @@ onMounted(loadAthlete);
       </section>
 
       <section class="profile-panel">
-        <p class="eyebrow">Historico</p>
+        <p class="eyebrow">Histórico</p>
         <h2>Avaliacoes</h2>
 
         <div v-if="!athlete.evaluations?.length" class="empty">
-          Nenhuma avaliacao cadastrada.
+          Nenhuma avaliação cadastrada.
         </div>
 
         <div v-else class="timeline">
