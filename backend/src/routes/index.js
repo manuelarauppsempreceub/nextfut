@@ -3,9 +3,14 @@ import prisma from "../database/prisma.js";
 import importRoutes from "./import.routes.js";
 import athleteRoutes from "./athlete.routes.js";
 import evaluationRoutes from "./evaluation.routes.js";
+import authRoutes from "./auth.routes.js";
+import adminRoutes from "./admin.routes.js";
+import { requireAuth, requireRoles } from "../services/auth.middleware.js";
 
 const router = Router();
 
+router.use("/auth", authRoutes);
+router.use("/admin", adminRoutes);
 router.use("/import", importRoutes);
 router.use(athleteRoutes);
 router.use(evaluationRoutes);
@@ -182,7 +187,7 @@ router.get("/athletes", async (req, res) => {
   res.json(athletes);
 });
 
-router.post("/athletes", async (req, res) => {
+router.post("/athletes", requireAuth, requireRoles("ADMIN"), async (req, res) => {
   const name = normalizeText(req.body.name);
   const age = toInt(req.body.age);
   const position = normalizeText(req.body.position);
@@ -280,7 +285,7 @@ router.get("/athletes/:id", async (req, res) => {
   res.json(athlete);
 });
 
-router.post("/athletes/:id/scout-interests", async (req, res) => {
+router.post("/athletes/:id/scout-interests", requireAuth, requireRoles("ADMIN", "SCOUT"), async (req, res) => {
   const athlete = await prisma.athlete.findUnique({
     where: {
       id: req.params.id
@@ -332,7 +337,7 @@ router.get("/scout-interests", async (req, res) => {
   res.json(interests);
 });
 
-router.patch("/scout-interests/:id/status", async (req, res) => {
+router.patch("/scout-interests/:id/status", requireAuth, requireRoles("ADMIN", "SCOUT"), async (req, res) => {
   const allowedStatuses = ["INTERESTED", "CONTACTED", "DISCARDED"];
   const status = String(req.body.status || "").trim().toUpperCase();
 

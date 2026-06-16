@@ -1,6 +1,7 @@
 import { Router } from "express";
 import prisma from "../database/prisma.js";
 import { calculatePerformance } from "../services/performance.service.js";
+import { requireAuth, requireRoles } from "../services/auth.middleware.js";
 
 const router = Router();
 
@@ -61,7 +62,7 @@ function hasAnyEvaluationData(evaluationData) {
   });
 }
 
-router.post("/athletes/:id/evaluations", async (req, res) => {
+router.post("/athletes/:id/evaluations", requireAuth, requireRoles("ADMIN", "SCOUT"), async (req, res) => {
   const athlete = await prisma.athlete.findUnique({
     where: {
       id: req.params.id

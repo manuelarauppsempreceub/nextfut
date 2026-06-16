@@ -2,6 +2,13 @@
 import { computed, onMounted, ref, watch } from "vue";
 import { RouterLink, useRoute } from "vue-router";
 import { api } from "../services/api";
+import {
+  athleteListActionLabel,
+  canCreateAthlete,
+  canEditAthlete,
+  canCreateEvaluation,
+  canRegisterInterest
+} from "../services/permissions";
 
 const route = useRoute();
 
@@ -236,7 +243,9 @@ onMounted(loadAthletes);
         </p>
       </div>
       <div class="actions-row">
-        <button class="button" type="button" @click="openCreateModal">Novo atleta</button>
+        <button v-if="canCreateAthlete()" class="button" type="button" @click="openCreateModal">
+          Novo atleta
+        </button>
         <button class="button secondary" type="button" @click="loadAthletes">Atualizar</button>
       </div>
     </div>
@@ -317,7 +326,7 @@ onMounted(loadAthletes);
                     <span class="button-icon">👁</span>
                   </button>
                   <RouterLink class="button compact action-icon-button" :to="`/atletas/${athlete.id}`">
-                    <span>Editar/Avaliar</span>
+                    <span>{{ athleteListActionLabel(athlete) }}</span>
                     <span class="button-icon">↗</span>
                   </RouterLink>
                 </div>
@@ -401,7 +410,14 @@ onMounted(loadAthletes);
         </div>
         <footer class="modal-actions">
           <button class="button secondary" type="button" @click="showDetailModal = false">Fechar</button>
-          <RouterLink class="button" :to="`/atletas/${selectedAthlete.id}`">Abrir edição completa</RouterLink>
+          <RouterLink
+            class="button"
+            :to="`/atletas/${selectedAthlete.id}`"
+          >
+            {{ canEditAthlete(selectedAthlete) || canCreateEvaluation() || canRegisterInterest()
+              ? "Abrir perfil completo"
+              : "Visualizar perfil" }}
+          </RouterLink>
         </footer>
       </section>
     </div>

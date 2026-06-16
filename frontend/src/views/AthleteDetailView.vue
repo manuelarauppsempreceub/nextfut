@@ -2,6 +2,11 @@
 import { computed, onMounted, ref } from "vue";
 import { RouterLink, useRoute } from "vue-router";
 import { api } from "../services/api";
+import {
+  canEditAthlete,
+  canCreateEvaluation,
+  canRegisterInterest
+} from "../services/permissions";
 
 const route = useRoute();
 
@@ -269,7 +274,11 @@ onMounted(loadAthlete);
           <div class="profile-actions">
             <span class="badge big">{{ athlete.accessCode }}</span>
 
-            <button class="button secondary" @click="fillEditForm">
+            <button
+              v-if="canEditAthlete(athlete)"
+              class="button secondary"
+              @click="fillEditForm"
+            >
               Editar atleta
             </button>
           </div>
@@ -368,7 +377,7 @@ onMounted(loadAthlete);
         </div>
       </section>
 
-      <section class="profile-panel">
+      <section v-if="canCreateEvaluation()" class="profile-panel">
         <div class="section-title-row">
           <div>
             <p class="eyebrow">Avaliação</p>
@@ -427,7 +436,7 @@ onMounted(loadAthlete);
         <p v-if="evaluationError" class="error">{{ evaluationError }}</p>
       </section>
 
-      <section class="profile-panel">
+      <section v-if="canRegisterInterest()" class="profile-panel">
         <p class="eyebrow">Olheiro</p>
         <h2>Registrar interesse</h2>
 
@@ -476,6 +485,15 @@ onMounted(loadAthlete);
           </article>
         </div>
       </section>
+
+      <section v-if="!canCreateEvaluation() && !canRegisterInterest()" class="profile-panel">
+        <p class="eyebrow">Permissões</p>
+        <h2>Acesso do atleta</h2>
+        <p class="page-description">
+          Você pode visualizar suas informações e avaliações. A criação de novas avaliações
+          e o registro de interesse são ações exclusivas de administradores e olheiros.
+        </p>
+      </section>      
 
       <section class="profile-panel">
         <p class="eyebrow">Histórico</p>

@@ -1,6 +1,7 @@
 ﻿import "dotenv/config";
 import { PrismaClient } from "@prisma/client";
 import { PrismaPg } from "@prisma/adapter-pg";
+import bcrypt from "bcryptjs";
 
 const adapter = new PrismaPg({
   connectionString: process.env.DATABASE_URL
@@ -11,6 +12,30 @@ const prisma = new PrismaClient({
 });
 
 async function main() {
+
+  const adminPasswordHash = await bcrypt.hash("Admin@123", 10);
+
+  await prisma.user.upsert({
+    where: {
+      email: "admin@nextfut.local"
+    },
+    update: {
+      name: "Administrador NextFut",
+      passwordHash: adminPasswordHash,
+      role: "ADMIN",
+      status: "ACTIVE"
+    },
+    create: {
+      name: "Administrador NextFut",
+      email: "admin@nextfut.local",
+      passwordHash: adminPasswordHash,
+      role: "ADMIN",
+      status: "ACTIVE"
+    }
+  });
+
+  console.log("Usuário administrador disponível: admin@nextfut.local / Admin@123");
+
   const evaluator = await prisma.evaluator.upsert({
     where: { id: "00000000-0000-0000-0000-000000000001" },
     update: {},

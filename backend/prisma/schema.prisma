@@ -39,10 +39,47 @@ enum ScoutInterestStatus {
   DISCARDED
 }
 
+enum UserRole {
+  ADMIN
+  VISITOR
+  SCOUT
+  ATHLETE
+}
+
+enum UserStatus {
+  PENDING
+  ACTIVE
+  INACTIVE
+  REJECTED
+}
+
 model HealthCheck {
   id        Int      @id @default(autoincrement())
   status    String   @default("ok")
   createdAt DateTime @default(now())
+}
+
+model User {
+  id           String     @id @default(uuid())
+  name         String
+  email        String     @unique
+  passwordHash String
+  role         UserRole
+  status       UserStatus @default(PENDING)
+  athleteId    String?
+  scoutName    String?
+  scoutEmail   String?
+  createdAt    DateTime   @default(now())
+  updatedAt    DateTime   @updatedAt
+
+  athlete Athlete? @relation(fields: [athleteId], references: [id], onDelete: SetNull)
+
+  @@index([name])
+  @@index([email])
+  @@index([role])
+  @@index([status])
+  @@index([athleteId])
+  @@map("users")
 }
 
 model Athlete {
@@ -58,9 +95,11 @@ model Athlete {
   region        String?
   schoolProject String?
   status        AthleteStatus @default(ACTIVE)
+  consentDataVisibility Boolean @default(false)
   createdAt     DateTime      @default(now())
   updatedAt     DateTime      @updatedAt
 
+  users          User[]
   evaluations    Evaluation[]
   scoutInterests ScoutInterest[]
 

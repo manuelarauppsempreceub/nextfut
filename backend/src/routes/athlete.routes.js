@@ -1,5 +1,6 @@
 import { Router } from "express";
 import prisma from "../database/prisma.js";
+import { requireAuth } from "../services/auth.middleware.js";
 
 const router = Router();
 
@@ -16,7 +17,7 @@ function toInt(value, fallback = null) {
   return Number.isFinite(number) ? Math.round(number) : fallback;
 }
 
-router.put("/athletes/:id", async (req, res) => {
+router.put("/athletes/:id", requireAuth, async (req, res) => {
   const athlete = await prisma.athlete.findUnique({
     where: {
       id: req.params.id
@@ -28,6 +29,16 @@ router.put("/athletes/:id", async (req, res) => {
       message: "Atleta nao encontrado"
     });
   }
+
+  const canEdit =
+    req.user.role === "ADMIN" ||
+    (req.user.role === "ATHLETE" && req.user.athleteId === athlete.id);
+
+  if (!canEdit) {
+    return res.status(403).json({
+      message: "Você não tem permissão para editar este atleta"
+    });
+  }  
 
   const name = normalizeText(req.body.name);
   const age = toInt(req.body.age);
