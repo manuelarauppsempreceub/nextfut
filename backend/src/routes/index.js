@@ -1,11 +1,13 @@
 import { Router } from "express";
 import prisma from "../database/prisma.js";
 import importRoutes from "./import.routes.js";
+import athleteRoutes from "./athlete.routes.js";
 import evaluationRoutes from "./evaluation.routes.js";
 
 const router = Router();
 
 router.use("/import", importRoutes);
+router.use(athleteRoutes);
 router.use(evaluationRoutes);
 
 function normalizeText(value) {

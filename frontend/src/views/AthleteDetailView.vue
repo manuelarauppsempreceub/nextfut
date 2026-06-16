@@ -19,6 +19,22 @@ const evaluationError = ref("");
 
 const showEvaluationForm = ref(false);
 
+const editLoading = ref(false);
+const editMessage = ref("");
+const editError = ref("");
+const showEditForm = ref(false);
+
+const editForm = ref({
+  name: "",
+  age: "",
+  position: "",
+  dominantFoot: "",
+  heightCm: "",
+  country: "",
+  region: "",
+  schoolProject: ""
+});
+
 const interestForm = ref({
   scoutName: "",
   scoutEmail: "",
@@ -58,6 +74,63 @@ const latestEvaluation = computed(() => {
 const latestPerformance = computed(() => {
   return latestEvaluation.value?.performanceResult || null;
 });
+
+function fillEditForm() {
+  if (!athlete.value) {
+    return;
+  }
+
+  editForm.value = {
+    name: athlete.value.name || "",
+    age: athlete.value.age || "",
+    position: athlete.value.position || "",
+    dominantFoot: athlete.value.dominantFoot || "",
+    heightCm: athlete.value.heightCm || "",
+    country: athlete.value.country || "",
+    region: athlete.value.region || "",
+    schoolProject: athlete.value.schoolProject || ""
+  };
+
+  editMessage.value = "";
+  editError.value = "";
+  showEditForm.value = true;
+}
+
+async function submitAthleteEdit() {
+  if (!editForm.value.name.trim()) {
+    editError.value = "Informe o nome do atleta.";
+    editMessage.value = "";
+    return;
+  }
+
+  try {
+    editLoading.value = true;
+    editError.value = "";
+    editMessage.value = "";
+
+    const payload = {
+      name: editForm.value.name,
+      age: editForm.value.age === "" ? null : Number(editForm.value.age),
+      position: editForm.value.position,
+      dominantFoot: editForm.value.dominantFoot,
+      heightCm: editForm.value.heightCm === "" ? null : Number(editForm.value.heightCm),
+      country: editForm.value.country,
+      region: editForm.value.region,
+      schoolProject: editForm.value.schoolProject
+    };
+
+    await api.put(`/athletes/${athlete.value.id}`, payload);
+
+    editMessage.value = "Dados do atleta atualizados com sucesso.";
+    showEditForm.value = false;
+
+    await loadAthlete();
+  } catch (err) {
+    editError.value = err.response?.data?.message || "Nao foi possivel atualizar o atleta.";
+  } finally {
+    editLoading.value = false;
+  }
+}
 
 async function loadAthlete() {
   try {
@@ -193,8 +266,74 @@ onMounted(loadAthlete);
             </p>
           </div>
 
-          <span class="badge big">{{ athlete.accessCode }}</span>
+          <div class="profile-actions">
+            <span class="badge big">{{ athlete.accessCode }}</span>
+
+            <button class="button secondary" @click="fillEditForm">
+              Editar atleta
+            </button>
+          </div>
         </div>
+
+        <form v-if="showEditForm" class="athlete-edit-form" @submit.prevent="submitAthleteEdit">
+          <div class="field full">
+            <label>Nome do atleta *</label>
+            <input v-model="editForm.name" type="text" />
+          </div>
+
+          <div class="field">
+            <label>Idade</label>
+            <input v-model="editForm.age" type="number" min="0" />
+          </div>
+
+          <div class="field">
+            <label>Posicao</label>
+            <input v-model="editForm.position" type="text" />
+          </div>
+
+          <div class="field">
+            <label>Pe dominante</label>
+            <select v-model="editForm.dominantFoot">
+              <option value="">Nao informado</option>
+              <option value="Direito">Direito</option>
+              <option value="Esquerdo">Esquerdo</option>
+              <option value="Ambidestro">Ambidestro</option>
+            </select>
+          </div>
+
+          <div class="field">
+            <label>Altura em cm</label>
+            <input v-model="editForm.heightCm" type="number" min="0" />
+          </div>
+
+          <div class="field">
+            <label>Pais</label>
+            <input v-model="editForm.country" type="text" />
+          </div>
+
+          <div class="field">
+            <label>Regiao</label>
+            <input v-model="editForm.region" type="text" />
+          </div>
+
+          <div class="field full">
+            <label>Escola ou projeto</label>
+            <input v-model="editForm.schoolProject" type="text" />
+          </div>
+
+          <div class="form-actions full">
+            <button class="button" type="submit" :disabled="editLoading">
+              {{ editLoading ? "Salvando..." : "Salvar alteracoes" }}
+            </button>
+
+            <button class="button secondary" type="button" @click="showEditForm = false">
+              Cancelar
+            </button>
+          </div>
+        </form>
+
+        <p v-if="editMessage" class="success">{{ editMessage }}</p>
+        <p v-if="editError" class="error">{{ editError }}</p>
 
         <div class="metrics detail-metrics">
           <div>
