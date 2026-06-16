@@ -1,10 +1,48 @@
-﻿import { Router } from "express";
+import { Router } from "express";
 import prisma from "../database/prisma.js";
 import importRoutes from "./import.routes.js";
 
 const router = Router();
 
 router.use("/import", importRoutes);
+
+function normalizeText(value) {
+  return String(value || "").trim();
+}
+
+function toInt(value, fallback = null) {
+  if (value === undefined || value === null || value === "") {
+    return fallback;
+  }
+
+  const number = Number(String(value).replace(",", "."));
+  return Number.isFinite(number) ? Math.round(number) : fallback;
+}
+
+async function generateNextAccessCode() {
+  const athletes = await prisma.athlete.findMany({
+    where: {
+      accessCode: {
+        startsWith: "NF-"
+      }
+    },
+    select: {
+      accessCode: true
+    }
+  });
+
+  const maxNumber = athletes.reduce((max, athlete) => {
+    const number = Number(String(athlete.accessCode || "").replace("NF-", ""));
+
+    if (!Number.isFinite(number)) {
+      return max;
+    }
+
+    return Math.max(max, number);
+  }, 0);
+
+  return `NF-${String(maxNumber + 1).padStart(4, "0")}`;
+}
 
 router.get("/health", (req, res) => {
   res.json({
@@ -138,6 +176,44 @@ router.get("/athletes", async (req, res) => {
   });
 
   res.json(athletes);
+});
+
+router.post("/athletes", async (req, res) => {
+  const name = normalizeText(req.body.name);
+  const age = toInt(req.body.age);
+  const position = normalizeText(req.body.position);
+  const dominantFoot = normalizeText(req.body.dominantFoot);
+  const heightCm = toInt(req.body.heightCm);
+  const country = normalizeText(req.body.country);
+  const region = normalizeText(req.body.region);
+  const schoolProject = normalizeText(req.body.schoolProject);
+
+  if (!name) {
+    return res.status(400).json({
+      message: "Nome do atleta é obrigatório"
+    });
+  }
+
+  const accessCode = await generateNextAccessCode();
+
+  const athlete = await prisma.athlete.create({
+    data: {
+      accessCode,
+      name,
+      age,
+      position: position || null,
+      dominantFoot: dominantFoot || null,
+      heightCm,
+      country: country || null,
+      region: region || null,
+      schoolProject: schoolProject || null
+    }
+  });
+
+  res.status(201).json({
+    message: "Atleta cadastrado com sucesso",
+    athlete
+  });
 });
 
 router.get("/athletes/access-code/:accessCode", async (req, res) => {

@@ -1,6 +1,7 @@
-﻿import { createRouter, createWebHistory } from "vue-router";
+import { createRouter, createWebHistory } from "vue-router";
 import HomeView from "../views/HomeView.vue";
 import AthletesView from "../views/AthletesView.vue";
+import AthleteCreateView from "../views/AthleteCreateView.vue";
 import AthleteDetailView from "../views/AthleteDetailView.vue";
 import ScoutDashboardView from "../views/ScoutDashboardView.vue";
 import ImportCsvView from "../views/ImportCsvView.vue";
@@ -22,6 +23,11 @@ const routes = [
     path: "/atletas",
     name: "athletes",
     component: AthletesView
+  },
+  {
+    path: "/atletas/novo",
+    name: "athlete-create",
+    component: AthleteCreateView
   },
   {
     path: "/atletas/:id",

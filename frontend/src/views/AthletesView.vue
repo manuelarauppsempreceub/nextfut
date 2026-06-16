@@ -1,4 +1,4 @@
-﻿<script setup>
+<script setup>
 import { onMounted, ref } from "vue";
 import { RouterLink } from "vue-router";
 import { api } from "../services/api";
@@ -40,7 +40,11 @@ onMounted(loadAthletes);
         <h1>Atletas cadastrados</h1>
       </div>
 
-      <button class="button secondary" @click="loadAthletes">
+      <RouterLink class="button" to="/atletas/novo">
+          Novo atleta
+        </RouterLink>
+
+        <button class="button secondary" @click="loadAthletes">
         Atualizar
       </button>
     </div>
