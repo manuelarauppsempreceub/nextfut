@@ -1,6 +1,6 @@
 import { Router } from "express";
 import prisma from "../database/prisma.js";
-import { requireAuth } from "../services/auth.middleware.js";
+import { requireAuth, requireRoles } from "../services/auth.middleware.js";
 
 const router = Router();
 
@@ -89,6 +89,62 @@ router.put("/athletes/:id", requireAuth, async (req, res) => {
 
   res.json({
     message: "Atleta atualizado com sucesso",
+    athlete: updatedAthlete
+  });
+});
+
+router.patch("/athletes/:id/status", requireAuth, requireRoles("ADMIN"), async (req, res) => {
+  const allowedStatuses = ["ACTIVE", "INACTIVE"];
+  const status = String(req.body.status || "").trim().toUpperCase();
+
+  if (!allowedStatuses.includes(status)) {
+    return res.status(400).json({
+      message: "Status inválido",
+      allowedStatuses
+    });
+  }
+
+  const athlete = await prisma.athlete.findUnique({
+    where: {
+      id: req.params.id
+    }
+  });
+
+  if (!athlete) {
+    return res.status(404).json({
+      message: "Atleta não encontrado"
+    });
+  }
+
+  const updatedAthlete = await prisma.athlete.update({
+    where: {
+      id: athlete.id
+    },
+    data: {
+      status
+    },
+    include: {
+      evaluations: {
+        orderBy: {
+          evaluatedAt: "desc"
+        },
+        include: {
+          evaluator: true,
+          performanceResult: true
+        }
+      },
+      scoutInterests: {
+        orderBy: {
+          createdAt: "desc"
+        }
+      }
+    }
+  });
+
+  res.json({
+    message: status === "ACTIVE"
+      ? "Atleta reativado com sucesso"
+      : "Atleta inativado com sucesso",
     athlete: updatedAthlete
   });
 });

@@ -97,4 +97,43 @@ router.patch("/users/:id/status", async (req, res) => {
   });
 });
 
+router.post("/reset-athletes", async (req, res) => {
+  const confirmation = String(req.body.confirmation || "").trim();
+
+  if (confirmation !== "ZERAR ATLETAS") {
+    return res.status(400).json({
+      message: "Confirmação inválida. Digite exatamente: ZERAR ATLETAS"
+    });
+  }
+
+  const [
+    scoutInterestsDeleted,
+    performanceResultsDeleted,
+    evaluationsDeleted,
+    athleteUsersDeleted,
+    athletesDeleted
+  ] = await prisma.$transaction([
+    prisma.scoutInterest.deleteMany({}),
+    prisma.performanceResult.deleteMany({}),
+    prisma.evaluation.deleteMany({}),
+    prisma.user.deleteMany({
+      where: {
+        role: "ATHLETE"
+      }
+    }),
+    prisma.athlete.deleteMany({})
+  ]);
+
+  res.json({
+    message: "Base de atletas zerada com sucesso",
+    deleted: {
+      scoutInterests: scoutInterestsDeleted.count,
+      performanceResults: performanceResultsDeleted.count,
+      evaluations: evaluationsDeleted.count,
+      athleteUsers: athleteUsersDeleted.count,
+      athletes: athletesDeleted.count
+    }
+  });
+});
+
 export default router;

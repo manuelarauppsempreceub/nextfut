@@ -7,7 +7,8 @@ import {
   canCreateAthlete,
   canEditAthlete,
   canCreateEvaluation,
-  canRegisterInterest
+  canRegisterInterest,
+  isAdmin
 } from "../services/permissions";
 
 const route = useRoute();
@@ -22,6 +23,7 @@ const search = ref("");
 const position = ref("");
 const region = ref("");
 const level = ref("");
+const statusFilter = ref("ACTIVE");
 const hasEvaluationOnly = ref(false);
 const sortKey = ref("name");
 const sortDirection = ref("asc");
@@ -52,7 +54,11 @@ async function loadAthletes() {
   try {
     loading.value = true;
     error.value = "";
-    const response = await api.get("/athletes");
+    const response = await api.get("/athletes", {
+      params: {
+        status: statusFilter.value
+      }
+    });
     athletes.value = response.data;
   } catch (err) {
     error.value = "Não foi possível carregar os atletas.";
@@ -153,6 +159,11 @@ watch([search, position, region, level, hasEvaluationOnly, pageSize], () => {
   currentPage.value = 1;
 });
 
+watch(statusFilter, async () => {
+  currentPage.value = 1;
+  await loadAthletes();
+});
+
 watch(totalPages, () => {
   if (currentPage.value > totalPages.value) {
     currentPage.value = totalPages.value;
@@ -229,6 +240,38 @@ async function submitAthlete() {
   }
 }
 
+function statusLabel(value) {
+  const labels = {
+    ACTIVE: "Ativo",
+    INACTIVE: "Inativo"
+  };
+
+  return labels[value] || value || "-";
+}
+
+async function updateAthleteStatus(athlete, status) {
+  const actionLabel = status === "ACTIVE" ? "reativar" : "inativar";
+  const confirmed = window.confirm(`Deseja realmente ${actionLabel} o atleta ${athlete.name}?`);
+
+  if (!confirmed) {
+    return;
+  }
+
+  try {
+    actionMessage.value = "";
+    actionError.value = "";
+
+    const response = await api.patch(`/athletes/${athlete.id}/status`, {
+      status
+    });
+
+    actionMessage.value = response.data.message || "Status atualizado com sucesso.";
+    await loadAthletes();
+  } catch (err) {
+    actionError.value = err.response?.data?.message || "Não foi possível atualizar o status do atleta.";
+  }
+}
+
 onMounted(loadAthletes);
 </script>
 
@@ -285,6 +328,14 @@ onMounted(loadAthletes);
             <option value="LOW">Baixo</option>
           </select>
         </div>
+        <div class="field">
+          <label>Status</label>
+          <select v-model="statusFilter">
+            <option value="ACTIVE">Ativos</option>
+            <option value="INACTIVE">Inativos</option>
+            <option value="ALL">Todos</option>
+          </select>
+        </div>        
         <button class="button secondary" type="button" @click="clearFilters">Limpar</button>
       </section>
 
@@ -305,6 +356,7 @@ onMounted(loadAthletes);
               <th><button class="sort-button" @click="changeSort('region')">Região{{ sortLabel('region') }}</button></th>
               <th><button class="sort-button" @click="changeSort('score')">Score{{ sortLabel('score') }}</button></th>
               <th><button class="sort-button" @click="changeSort('level')">Nível{{ sortLabel('level') }}</button></th>
+              <th>Status</th>
               <th class="actions-column">Ações</th>
             </tr>
           </thead>
@@ -320,6 +372,9 @@ onMounted(loadAthletes);
               <td><strong>{{ latestPerformance(athlete)?.performanceScore ?? "-" }}</strong></td>
               <td>{{ levelLabel(levelOf(athlete)) }}</td>
               <td>
+                <span class="badge muted">{{ statusLabel(athlete.status) }}</span>
+              </td>
+              <td>
                 <div class="table-actions end">
                   <button class="button secondary compact action-icon-button" type="button" @click="openDetailModal(athlete)">
                     <span>Detalhar</span>
@@ -329,6 +384,25 @@ onMounted(loadAthletes);
                     <span>{{ athleteListActionLabel(athlete) }}</span>
                     <span class="button-icon">↗</span>
                   </RouterLink>
+                  <button
+                    v-if="isAdmin() && athlete.status === 'ACTIVE'"
+                    class="button secondary danger compact action-icon-button"
+                    type="button"
+                    @click="updateAthleteStatus(athlete, 'INACTIVE')"
+                  >
+                    <span>Inativar</span>
+                    <span class="button-icon">×</span>
+                  </button>
+
+                  <button
+                    v-if="isAdmin() && athlete.status === 'INACTIVE'"
+                    class="button secondary compact action-icon-button"
+                    type="button"
+                    @click="updateAthleteStatus(athlete, 'ACTIVE')"
+                  >
+                    <span>Reativar</span>
+                    <span class="button-icon">↻</span>
+                  </button>                  
                 </div>
               </td>
             </tr>

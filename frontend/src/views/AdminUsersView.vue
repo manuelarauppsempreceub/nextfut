@@ -7,6 +7,12 @@ const loading = ref(false);
 const error = ref("");
 const statusFilter = ref("PENDING");
 
+const resetConfirmation = ref("");
+const resetLoading = ref(false);
+const resetMessage = ref("");
+const resetError = ref("");
+const resetResult = ref(null);
+
 const statusOptions = [
   { value: "", label: "Todos" },
   { value: "PENDING", label: "Pendentes" },
@@ -73,6 +79,44 @@ async function updateStatus(user, status) {
     await loadUsers();
   } catch (err) {
     error.value = err.response?.data?.message || "Não foi possível atualizar o status.";
+  }
+}
+
+async function resetAthletesBase() {
+  if (resetConfirmation.value !== "ZERAR ATLETAS") {
+    resetError.value = "Digite exatamente ZERAR ATLETAS para confirmar.";
+    resetMessage.value = "";
+    resetResult.value = null;
+    return;
+  }
+
+  const confirmed = window.confirm(
+    "Esta ação apagará atletas, avaliações, resultados de performance, interesses e usuários atletas. Deseja continuar?"
+  );
+
+  if (!confirmed) {
+    return;
+  }
+
+  try {
+    resetLoading.value = true;
+    resetError.value = "";
+    resetMessage.value = "";
+    resetResult.value = null;
+
+    const response = await api.post("/admin/reset-athletes", {
+      confirmation: resetConfirmation.value
+    });
+
+    resetMessage.value = response.data.message;
+    resetResult.value = response.data.deleted;
+    resetConfirmation.value = "";
+
+    await loadUsers();
+  } catch (err) {
+    resetError.value = err.response?.data?.message || "Não foi possível zerar a base de atletas.";
+  } finally {
+    resetLoading.value = false;
   }
 }
 
@@ -185,4 +229,70 @@ onMounted(loadUsers);
       </table>
     </div>
   </section>
+
+  <section class="profile-panel danger-zone-panel">
+    <div class="page-header compact-header">
+      <div>
+        <p class="eyebrow">Ambiente de demonstração</p>
+        <h2>Zerar base de atletas</h2>
+        <p class="page-description">
+          Esta ação remove atletas, avaliações, resultados de performance, interesses de olheiros
+          e usuários com perfil Atleta. O usuário administrador será preservado.
+        </p>
+      </div>
+    </div>
+
+    <div class="danger-zone-box">
+      <div>
+        <strong>Ação irreversível para os dados operacionais</strong>
+        <p>
+          Para confirmar, digite <code>ZERAR ATLETAS</code> no campo abaixo.
+        </p>
+      </div>
+
+      <div class="danger-zone-actions">
+        <input
+          v-model="resetConfirmation"
+          type="text"
+          placeholder="Digite ZERAR ATLETAS"
+        />
+
+        <button
+          class="button danger"
+          type="button"
+          :disabled="resetLoading"
+          @click="resetAthletesBase"
+        >
+          {{ resetLoading ? "Zerando..." : "Zerar base de atletas" }}
+        </button>
+      </div>
+    </div>
+
+    <p v-if="resetError" class="error">{{ resetError }}</p>
+    <p v-if="resetMessage" class="success-message">{{ resetMessage }}</p>
+
+    <div v-if="resetResult" class="reset-result-grid">
+      <div>
+        <span>Atletas</span>
+        <strong>{{ resetResult.athletes }}</strong>
+      </div>
+      <div>
+        <span>Avaliações</span>
+        <strong>{{ resetResult.evaluations }}</strong>
+      </div>
+      <div>
+        <span>Resultados</span>
+        <strong>{{ resetResult.performanceResults }}</strong>
+      </div>
+      <div>
+        <span>Interesses</span>
+        <strong>{{ resetResult.scoutInterests }}</strong>
+      </div>
+      <div>
+        <span>Usuários atletas</span>
+        <strong>{{ resetResult.athleteUsers }}</strong>
+      </div>
+    </div>
+  </section>
+
 </template>

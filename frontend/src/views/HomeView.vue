@@ -14,6 +14,7 @@ import { RouterLink } from "vue-router";
       </RouterLink>
 
       <nav class="public-nav">
+        <RouterLink to="/portal-atleta">Portal do Atleta</RouterLink>
         <RouterLink to="/login">Login</RouterLink>
         <RouterLink class="button compact" to="/cadastro/atleta">Cadastro de Atleta</RouterLink>
         <RouterLink class="button secondary compact" to="/cadastro/olheiro">Cadastro de Olheiro</RouterLink>
@@ -31,7 +32,8 @@ import { RouterLink } from "vue-router";
         </p>
 
         <div class="public-actions">
-          <RouterLink class="button" to="/cadastro/atleta">Sou Atleta</RouterLink>
+          <RouterLink class="button" to="/portal-atleta">Consultar desempenho</RouterLink>
+          <RouterLink class="button secondary" to="/cadastro/atleta">Sou Atleta</RouterLink>
           <RouterLink class="button secondary" to="/cadastro/olheiro">Sou Olheiro</RouterLink>
           <RouterLink class="text-link" to="/login">Já tenho acesso</RouterLink>
         </div>

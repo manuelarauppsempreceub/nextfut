@@ -58,9 +58,15 @@ async function submitLogin() {
 
         <p v-if="error" class="error">{{ error }}</p>
 
-        <button class="button" type="submit" :disabled="loading">
-          {{ loading ? "Entrando..." : "Entrar" }}
-        </button>
+        <div class="form-actions">
+          <RouterLink class="button secondary" to="/">
+            Voltar
+          </RouterLink>
+
+          <button class="button" type="submit" :disabled="loading">
+            {{ loading ? "Entrando..." : "Entrar" }}
+          </button>
+        </div>
       </form>
 
       <div class="auth-links">

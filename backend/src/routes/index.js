@@ -162,7 +162,16 @@ router.get("/dashboard/summary", async (req, res) => {
 });
 
 router.get("/athletes", async (req, res) => {
+  const status = String(req.query.status || "ACTIVE").trim().toUpperCase();
+
+  const where = {};
+
+  if (["ACTIVE", "INACTIVE"].includes(status)) {
+    where.status = status;
+  }
+
   const athletes = await prisma.athlete.findMany({
+    where,
     orderBy: {
       createdAt: "desc"
     },

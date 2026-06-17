@@ -34,7 +34,7 @@ function roleLabel(role) {
 function logout() {
   clearSession();
   currentUser.value = null;
-  router.push("/login");
+  router.push("/");
 }
 </script>
 

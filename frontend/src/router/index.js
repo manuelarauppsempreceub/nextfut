@@ -60,7 +60,7 @@ const routes = [
     name: "athlete-portal",
     component: AthletePortalView,
     meta: {
-      requiresAuth: true
+      publicLayout: true
     }
   },
   {
