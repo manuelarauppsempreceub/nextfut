@@ -168,8 +168,8 @@ function formatDate(value) {
           Última avaliação: {{ formatDate(latestEvaluation.evaluatedAt) }}
         </p>
 
-        <RouterLink class="button secondary" :to="`/atletas/${athlete.id}`">
-          Ver histórico completo
+        <RouterLink class="button secondary" to="/">
+          Voltar
         </RouterLink>
       </div>
     </section>
