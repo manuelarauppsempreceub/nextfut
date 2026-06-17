@@ -2,7 +2,7 @@
 
 git add .
 
-git commit -m "Potal do atleta mantem menu lataral aberto"
+git commit -m "retira card nextfut da home"
 
 git push manuela HEAD:main
 git push origin HEAD:nextfut-mvp-atual

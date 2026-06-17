@@ -32,11 +32,6 @@ onBeforeUnmount(() => {
   }
 });
 
-const jogadores = [
-  { iniciais: "PS", nome: "Pedro Silva", meta: "Atacante · Sub-13 · Alto potencial", score: 88 },
-  { iniciais: "JV", nome: "João Victor", meta: "Meio-campo · Sub-11 · Evolução técnica", score: 87 },
-  { iniciais: "LC", nome: "Lucas Costa", meta: "Defensor · Sub-12 · Perfil consistente", score: 86 }
-];
 </script>
 
 <template>
@@ -77,37 +72,7 @@ const jogadores = [
             </div>
           </div>
 
-          <aside class="home-panel" aria-label="Resumo da plataforma NextFut">
-            <div class="home-panel__header">
-              <span class="live-dot"></span>
-              <strong>Radar NextFut</strong>
-            </div>
-
-            <div class="home-panel__score">
-              <span>Match médio</span>
-              <strong>91%</strong>
-            </div>
-
-            <div
-              class="next-preview-row"
-              v-for="jogador in jogadores"
-              :key="jogador.nome"
-            >
-              <div class="next-avatar">{{ jogador.iniciais }}</div>
-
-              <div>
-                <strong>{{ jogador.nome }}</strong>
-                <p>{{ jogador.meta }}</p>
-              </div>
-
-              <div class="next-score">{{ jogador.score }}%</div>
-            </div>
-
-            <div class="home-panel__note">
-              <strong>Modelo de desempenho</strong>
-              <p>Score, potencial, pontos fortes e recomendações em uma única jornada.</p>
-            </div>
-          </aside>
+          
         </div>
       </section>
 
@@ -249,11 +214,11 @@ const jogadores = [
   z-index: 0;
   pointer-events: none;
   background-image:
-    linear-gradient(rgba(255, 255, 255, 0.018) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(255, 255, 255, 0.018) 1px, transparent 1px);
+    linear-gradient(rgba(255, 255, 255, 0.016) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 255, 255, 0.016) 1px, transparent 1px);
   background-size: 68px 68px;
-  opacity: 0.35;
-  mask-image: linear-gradient(to bottom, rgba(0, 0, 0, 0.45), transparent 82%);
+  opacity: 0.26;
+  mask-image: linear-gradient(to bottom, rgba(0, 0, 0, 0.32), transparent 82%);
 }
 
 .next-public-page :deep(a) {
@@ -275,24 +240,25 @@ const jogadores = [
   width: fit-content;
   margin-bottom: 18px;
   padding: 8px 13px;
-  border: 1px solid rgba(25, 229, 140, 0.42);
+  border: 1px solid rgba(25, 229, 140, 0.46);
   border-radius: 999px;
-  background: rgba(2, 12, 18, 0.34);
+  background: rgba(2, 12, 18, 0.26);
   color: #19e58c;
   font-size: 0.78rem;
   font-weight: 850;
   letter-spacing: 0.12em;
   text-transform: uppercase;
-  backdrop-filter: blur(8px);
+  backdrop-filter: blur(6px);
 }
 
 .next-title {
   margin: 0;
-  font-size: clamp(2.2rem, 5vw, 4.4rem);
-  line-height: 1.08;
-  letter-spacing: -0.04em;
+  max-width: 820px;
+  font-size: clamp(2.4rem, 5.4vw, 5rem);
+  line-height: 1.06;
+  letter-spacing: -0.045em;
   font-weight: 850;
-  text-shadow: 0 4px 28px rgba(0, 0, 0, 0.52);
+  text-shadow: 0 5px 30px rgba(0, 0, 0, 0.48);
 }
 
 .next-title span,
@@ -309,10 +275,10 @@ const jogadores = [
 
 .next-text {
   margin-top: 18px;
-  color: #dbeafe;
+  color: #e2e8f0;
   font-size: 1.08rem;
   max-width: 720px;
-  text-shadow: 0 3px 18px rgba(0, 0, 0, 0.55);
+  text-shadow: 0 3px 18px rgba(0, 0, 0, 0.45);
 }
 
 .next-text--center {
@@ -340,7 +306,11 @@ const jogadores = [
   border-radius: 999px;
   cursor: pointer;
   font-weight: 900;
-  transition: 0.2s;
+  transition:
+    transform 0.2s ease,
+    border-color 0.2s ease,
+    background 0.2s ease,
+    box-shadow 0.2s ease;
 }
 
 .next-btn:hover {
@@ -354,19 +324,18 @@ const jogadores = [
 }
 
 .next-btn--secondary {
-  border-color: rgba(255, 255, 255, 0.24);
-  background: rgba(2, 12, 18, 0.42);
+  border-color: rgba(255, 255, 255, 0.28);
+  background: rgba(2, 12, 18, 0.34);
   color: #f8fafc;
-  backdrop-filter: blur(8px);
+  backdrop-filter: blur(7px);
 }
 
-/* HERO COM IMAGEM MUITO MAIS VISÍVEL */
 .home-hero {
   position: relative;
   min-height: calc(100vh - 74px);
   display: grid;
   align-items: center;
-  padding: 78px 0 92px;
+  padding: 96px 0 110px;
   overflow: hidden;
   isolation: isolate;
   background: #06101e;
@@ -380,11 +349,10 @@ const jogadores = [
   background-size: cover;
   background-repeat: no-repeat;
   transform: scale(1.005);
-  filter: brightness(2.15) contrast(1.05) saturate(1.16);
+  filter: brightness(2.22) contrast(1.04) saturate(1.18);
   will-change: opacity;
 }
 
-/* Removido o overlay escuro que estava dentro da própria imagem */
 .home-hero__background::after {
   content: none;
 }
@@ -402,7 +370,6 @@ const jogadores = [
   opacity: 1;
 }
 
-/* Overlay bem leve: escurece só o suficiente para o texto à esquerda */
 .home-hero__overlay {
   position: absolute;
   inset: 0;
@@ -410,21 +377,20 @@ const jogadores = [
   background:
     linear-gradient(
       90deg,
-      rgba(3, 7, 18, 0.58) 0%,
-      rgba(3, 7, 18, 0.34) 31%,
-      rgba(3, 7, 18, 0.10) 58%,
-      rgba(3, 7, 18, 0.02) 100%
+      rgba(3, 7, 18, 0.52) 0%,
+      rgba(3, 7, 18, 0.28) 30%,
+      rgba(3, 7, 18, 0.07) 57%,
+      rgba(3, 7, 18, 0.00) 100%
     ),
     linear-gradient(
       180deg,
-      rgba(3, 7, 18, 0.04) 0%,
-      rgba(3, 7, 18, 0.14) 72%,
-      rgba(3, 7, 18, 0.28) 100%
+      rgba(3, 7, 18, 0.02) 0%,
+      rgba(3, 7, 18, 0.10) 74%,
+      rgba(3, 7, 18, 0.22) 100%
     );
   pointer-events: none;
 }
 
-/* Brilhos decorativos praticamente neutros para não “sujar” a imagem */
 .home-hero::before {
   content: "";
   position: absolute;
@@ -433,7 +399,7 @@ const jogadores = [
   width: 680px;
   height: 680px;
   border-radius: 999px;
-  background: radial-gradient(circle, rgba(25, 229, 140, 0.035), transparent 66%);
+  background: radial-gradient(circle, rgba(25, 229, 140, 0.025), transparent 66%);
   pointer-events: none;
 }
 
@@ -445,15 +411,16 @@ const jogadores = [
   width: 620px;
   height: 620px;
   border-radius: 999px;
-  background: radial-gradient(circle, rgba(56, 189, 248, 0.025), transparent 68%);
+  background: radial-gradient(circle, rgba(56, 189, 248, 0.018), transparent 68%);
   pointer-events: none;
 }
 
 .home-hero__grid {
   display: grid;
-  grid-template-columns: minmax(0, 1.1fr) minmax(340px, 0.68fr);
+  grid-template-columns: minmax(0, 820px);
   gap: 42px;
   align-items: center;
+  justify-content: start;
 }
 
 .home-hero__content {
@@ -462,113 +429,6 @@ const jogadores = [
 
 .home-hero__text {
   max-width: 760px;
-}
-
-/* Card mais translúcido para deixar a imagem aparecer atrás */
-.home-panel {
-  position: relative;
-  padding: 26px;
-  border: 1px solid rgba(25, 229, 140, 0.34);
-  border-radius: 34px;
-  background:
-    radial-gradient(circle at top, rgba(25, 229, 140, 0.13), transparent 55%),
-    rgba(4, 16, 24, 0.34);
-  box-shadow: 0 26px 70px rgba(0, 0, 0, 0.22);
-  backdrop-filter: blur(8px);
-}
-
-.home-panel__header {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  color: #e2e8f0;
-  margin-bottom: 18px;
-}
-
-.live-dot {
-  width: 9px;
-  height: 9px;
-  border-radius: 50%;
-  background: #19e58c;
-  box-shadow: 0 0 0 6px rgba(25, 229, 140, 0.12), 0 0 24px rgba(25, 229, 140, 0.65);
-}
-
-.home-panel__score {
-  display: flex;
-  align-items: end;
-  justify-content: space-between;
-  padding: 20px;
-  margin-bottom: 16px;
-  border-radius: 24px;
-  background: rgba(4, 16, 24, 0.34);
-  border: 1px solid rgba(255, 255, 255, 0.16);
-}
-
-.home-panel__score span {
-  color: #cbd5e1;
-  font-weight: 800;
-}
-
-.home-panel__score strong {
-  color: #19e58c;
-  font-size: 3rem;
-  line-height: 0.9;
-  letter-spacing: -0.06em;
-}
-
-.next-preview-row {
-  display: grid;
-  grid-template-columns: 52px 1fr auto;
-  align-items: center;
-  gap: 12px;
-  padding: 13px;
-  border: 1px solid rgba(255, 255, 255, 0.14);
-  border-radius: 18px;
-  background: rgba(4, 16, 24, 0.34);
-}
-
-.next-preview-row + .next-preview-row {
-  margin-top: 10px;
-}
-
-.next-preview-row p {
-  margin: 2px 0 0;
-  color: #cbd5e1;
-  font-size: 0.9rem;
-}
-
-.next-avatar {
-  width: 52px;
-  height: 52px;
-  border-radius: 18px;
-  background: linear-gradient(135deg, #19e58c, #2563eb);
-  display: grid;
-  place-items: center;
-  color: #06101e;
-  font-weight: 950;
-}
-
-.next-score {
-  color: #19e58c;
-  font-weight: 950;
-}
-
-.home-panel__note {
-  margin-top: 16px;
-  padding: 18px;
-  border-radius: 22px;
-  border: 1px solid rgba(56, 189, 248, 0.22);
-  background: rgba(3, 20, 32, 0.38);
-}
-
-.home-panel__note strong {
-  color: #38bdf8;
-}
-
-.home-panel__note p {
-  margin: 5px 0 0;
-  color: #e2e8f0;
-  font-size: 0.92rem;
 }
 
 .portal-strip {
@@ -629,7 +489,11 @@ const jogadores = [
   background: linear-gradient(180deg, rgba(255, 255, 255, 0.085), rgba(255, 255, 255, 0.028));
   box-shadow: 0 26px 70px rgba(0, 0, 0, 0.28);
   overflow: hidden;
-  transition: transform 0.25s ease, border-color 0.25s ease, box-shadow 0.25s ease, background 0.25s ease;
+  transition:
+    transform 0.25s ease,
+    border-color 0.25s ease,
+    box-shadow 0.25s ease,
+    background 0.25s ease;
 }
 
 .portal-card::before {
@@ -829,10 +693,6 @@ const jogadores = [
     grid-template-columns: 1fr;
   }
 
-  .home-panel {
-    max-width: 620px;
-  }
-
   .signup-actions {
     justify-content: flex-start;
   }
@@ -845,7 +705,7 @@ const jogadores = [
 
   .home-hero {
     min-height: auto;
-    padding: 54px 0 70px;
+    padding: 64px 0 78px;
   }
 
   .portal-gateway,
@@ -867,6 +727,20 @@ const jogadores = [
     font-size: 1.75rem;
   }
 
+  .next-text {
+    font-size: 1rem;
+  }
+
+  .next-actions,
+  .signup-actions {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .next-btn {
+    width: 100%;
+  }
+
   .portal-card {
     padding: 22px;
     border-radius: 24px;
@@ -875,23 +749,6 @@ const jogadores = [
   .portal-card__top {
     align-items: flex-start;
     flex-direction: column;
-  }
-
-  .home-panel {
-    padding: 18px;
-    border-radius: 26px;
-  }
-
-  .next-preview-row {
-    grid-template-columns: 44px 1fr;
-  }
-
-  .next-preview-row .next-score {
-    grid-column: 2;
-  }
-
-  .home-panel__score strong {
-    font-size: 2.4rem;
   }
 }
 </style>
