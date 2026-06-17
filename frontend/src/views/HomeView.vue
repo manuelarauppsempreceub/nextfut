@@ -1,7 +1,36 @@
 <script setup>
+import { computed, onBeforeUnmount, onMounted, ref } from "vue";
 import { RouterLink } from "vue-router";
 import PublicHeader from "../components/layout/PublicHeader.vue";
 import PublicFooter from "../components/layout/PublicFooter.vue";
+
+const heroBackgrounds = [
+  "/images/home/hero-1.png",
+  "/images/home/hero-2.png",
+  "/images/home/hero-3.png",
+  "/images/home/hero-4.png"
+];
+
+const currentHeroBackgroundIndex = ref(0);
+
+const currentHeroBackground = computed(() => {
+  return heroBackgrounds[currentHeroBackgroundIndex.value];
+});
+
+let heroBackgroundTimer = null;
+
+onMounted(() => {
+  heroBackgroundTimer = window.setInterval(() => {
+    currentHeroBackgroundIndex.value =
+      (currentHeroBackgroundIndex.value + 1) % heroBackgrounds.length;
+  }, 6500);
+});
+
+onBeforeUnmount(() => {
+  if (heroBackgroundTimer) {
+    window.clearInterval(heroBackgroundTimer);
+  }
+});
 
 const jogadores = [
   { iniciais: "PS", nome: "Pedro Silva", meta: "Atacante · Sub-13 · Alto potencial", score: 88 },
@@ -16,6 +45,14 @@ const jogadores = [
 
     <main>
       <section class="home-hero">
+        <div
+          class="home-hero__background"
+          :style="{ backgroundImage: `url(${currentHeroBackground})` }"
+          aria-hidden="true"
+        ></div>
+
+        <div class="home-hero__overlay" aria-hidden="true"></div>
+
         <div class="next-container home-hero__grid">
           <div class="home-hero__content">
             <div class="next-eyebrow">NextFut · Plataforma de talentos</div>
@@ -199,10 +236,7 @@ const jogadores = [
 .next-public-page {
   min-height: 100vh;
   font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-  background:
-    radial-gradient(circle at top left, rgba(25, 229, 140, 0.13), transparent 34%),
-    radial-gradient(circle at top right, rgba(37, 99, 235, 0.16), transparent 32%),
-    linear-gradient(180deg, #06101e 0%, #07111f 46%, #081525 100%);
+  background: #06101e;
   color: #f8fafc;
   line-height: 1.6;
   overflow-x: hidden;
@@ -215,10 +249,11 @@ const jogadores = [
   z-index: 0;
   pointer-events: none;
   background-image:
-    linear-gradient(rgba(255, 255, 255, 0.032) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(255, 255, 255, 0.032) 1px, transparent 1px);
+    linear-gradient(rgba(255, 255, 255, 0.018) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 255, 255, 0.018) 1px, transparent 1px);
   background-size: 68px 68px;
-  mask-image: linear-gradient(to bottom, rgba(0, 0, 0, 0.8), transparent 82%);
+  opacity: 0.35;
+  mask-image: linear-gradient(to bottom, rgba(0, 0, 0, 0.45), transparent 82%);
 }
 
 .next-public-page :deep(a) {
@@ -228,7 +263,7 @@ const jogadores = [
 
 .next-container {
   position: relative;
-  z-index: 1;
+  z-index: 5;
   width: min(100% - 40px, 1180px);
   margin-inline: auto;
 }
@@ -240,14 +275,15 @@ const jogadores = [
   width: fit-content;
   margin-bottom: 18px;
   padding: 8px 13px;
-  border: 1px solid rgba(25, 229, 140, 0.32);
+  border: 1px solid rgba(25, 229, 140, 0.42);
   border-radius: 999px;
-  background: rgba(25, 229, 140, 0.08);
+  background: rgba(2, 12, 18, 0.34);
   color: #19e58c;
   font-size: 0.78rem;
   font-weight: 850;
   letter-spacing: 0.12em;
   text-transform: uppercase;
+  backdrop-filter: blur(8px);
 }
 
 .next-title {
@@ -256,6 +292,7 @@ const jogadores = [
   line-height: 1.08;
   letter-spacing: -0.04em;
   font-weight: 850;
+  text-shadow: 0 4px 28px rgba(0, 0, 0, 0.52);
 }
 
 .next-title span,
@@ -272,14 +309,16 @@ const jogadores = [
 
 .next-text {
   margin-top: 18px;
-  color: #cbd5e1;
+  color: #dbeafe;
   font-size: 1.08rem;
   max-width: 720px;
+  text-shadow: 0 3px 18px rgba(0, 0, 0, 0.55);
 }
 
 .next-text--center {
   margin-inline: auto;
   text-align: center;
+  text-shadow: none;
 }
 
 .next-actions,
@@ -311,15 +350,17 @@ const jogadores = [
 .next-btn--primary {
   background: linear-gradient(135deg, #19e58c, #0fbf72);
   color: #03120c;
-  box-shadow: 0 18px 40px rgba(25, 229, 140, 0.22);
+  box-shadow: 0 18px 40px rgba(25, 229, 140, 0.24);
 }
 
 .next-btn--secondary {
-  border-color: rgba(255, 255, 255, 0.12);
-  background: rgba(255, 255, 255, 0.045);
+  border-color: rgba(255, 255, 255, 0.24);
+  background: rgba(2, 12, 18, 0.42);
   color: #f8fafc;
+  backdrop-filter: blur(8px);
 }
 
+/* HERO COM IMAGEM MUITO MAIS VISÍVEL */
 .home-hero {
   position: relative;
   min-height: calc(100vh - 74px);
@@ -327,16 +368,72 @@ const jogadores = [
   align-items: center;
   padding: 78px 0 92px;
   overflow: hidden;
+  isolation: isolate;
+  background: #06101e;
 }
 
+.home-hero__background {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  background-position: center;
+  background-size: cover;
+  background-repeat: no-repeat;
+  transform: scale(1.005);
+  filter: brightness(2.15) contrast(1.05) saturate(1.16);
+  will-change: opacity;
+}
+
+/* Removido o overlay escuro que estava dentro da própria imagem */
+.home-hero__background::after {
+  content: none;
+}
+
+.home-hero__background--active {
+  opacity: 1;
+}
+
+.home-hero__background--next {
+  opacity: 0;
+  transition: opacity 1.2s ease-in-out;
+}
+
+.home-hero__background--next.is-visible {
+  opacity: 1;
+}
+
+/* Overlay bem leve: escurece só o suficiente para o texto à esquerda */
+.home-hero__overlay {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  background:
+    linear-gradient(
+      90deg,
+      rgba(3, 7, 18, 0.58) 0%,
+      rgba(3, 7, 18, 0.34) 31%,
+      rgba(3, 7, 18, 0.10) 58%,
+      rgba(3, 7, 18, 0.02) 100%
+    ),
+    linear-gradient(
+      180deg,
+      rgba(3, 7, 18, 0.04) 0%,
+      rgba(3, 7, 18, 0.14) 72%,
+      rgba(3, 7, 18, 0.28) 100%
+    );
+  pointer-events: none;
+}
+
+/* Brilhos decorativos praticamente neutros para não “sujar” a imagem */
 .home-hero::before {
   content: "";
   position: absolute;
   inset: -20% -10% auto auto;
+  z-index: 2;
   width: 680px;
   height: 680px;
   border-radius: 999px;
-  background: radial-gradient(circle, rgba(25, 229, 140, 0.18), transparent 66%);
+  background: radial-gradient(circle, rgba(25, 229, 140, 0.035), transparent 66%);
   pointer-events: none;
 }
 
@@ -344,10 +441,11 @@ const jogadores = [
   content: "";
   position: absolute;
   inset: auto auto -22% -14%;
+  z-index: 2;
   width: 620px;
   height: 620px;
   border-radius: 999px;
-  background: radial-gradient(circle, rgba(56, 189, 248, 0.14), transparent 68%);
+  background: radial-gradient(circle, rgba(56, 189, 248, 0.025), transparent 68%);
   pointer-events: none;
 }
 
@@ -366,23 +464,24 @@ const jogadores = [
   max-width: 760px;
 }
 
+/* Card mais translúcido para deixar a imagem aparecer atrás */
 .home-panel {
   position: relative;
   padding: 26px;
-  border: 1px solid rgba(25, 229, 140, 0.22);
+  border: 1px solid rgba(25, 229, 140, 0.34);
   border-radius: 34px;
   background:
-    radial-gradient(circle at top, rgba(25, 229, 140, 0.16), transparent 55%),
-    rgba(255, 255, 255, 0.052);
-  box-shadow: 0 28px 80px rgba(0, 0, 0, 0.35);
-  backdrop-filter: blur(14px);
+    radial-gradient(circle at top, rgba(25, 229, 140, 0.13), transparent 55%),
+    rgba(4, 16, 24, 0.34);
+  box-shadow: 0 26px 70px rgba(0, 0, 0, 0.22);
+  backdrop-filter: blur(8px);
 }
 
 .home-panel__header {
   display: flex;
   align-items: center;
   gap: 10px;
-  color: #cbd5e1;
+  color: #e2e8f0;
   margin-bottom: 18px;
 }
 
@@ -401,12 +500,12 @@ const jogadores = [
   padding: 20px;
   margin-bottom: 16px;
   border-radius: 24px;
-  background: rgba(255, 255, 255, 0.055);
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: rgba(4, 16, 24, 0.34);
+  border: 1px solid rgba(255, 255, 255, 0.16);
 }
 
 .home-panel__score span {
-  color: #94a3b8;
+  color: #cbd5e1;
   font-weight: 800;
 }
 
@@ -423,9 +522,9 @@ const jogadores = [
   align-items: center;
   gap: 12px;
   padding: 13px;
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.14);
   border-radius: 18px;
-  background: rgba(255, 255, 255, 0.04);
+  background: rgba(4, 16, 24, 0.34);
 }
 
 .next-preview-row + .next-preview-row {
@@ -434,7 +533,7 @@ const jogadores = [
 
 .next-preview-row p {
   margin: 2px 0 0;
-  color: #94a3b8;
+  color: #cbd5e1;
   font-size: 0.9rem;
 }
 
@@ -458,8 +557,8 @@ const jogadores = [
   margin-top: 16px;
   padding: 18px;
   border-radius: 22px;
-  border: 1px solid rgba(56, 189, 248, 0.18);
-  background: rgba(56, 189, 248, 0.07);
+  border: 1px solid rgba(56, 189, 248, 0.22);
+  background: rgba(3, 20, 32, 0.38);
 }
 
 .home-panel__note strong {
@@ -468,7 +567,7 @@ const jogadores = [
 
 .home-panel__note p {
   margin: 5px 0 0;
-  color: #cbd5e1;
+  color: #e2e8f0;
   font-size: 0.92rem;
 }
 
