@@ -5,6 +5,7 @@ import LoginView from "../views/LoginView.vue";
 import RegisterAthleteView from "../views/RegisterAthleteView.vue";
 import RegisterScoutView from "../views/RegisterScoutView.vue";
 import AdminUsersView from "../views/AdminUsersView.vue";
+import AdminScoutsView from "../views/AdminScoutsView.vue";
 import AthletesView from "../views/AthletesView.vue";
 import AthleteCreateView from "../views/AthleteCreateView.vue";
 import AthleteDetailView from "../views/AthleteDetailView.vue";
@@ -119,6 +120,15 @@ const routes = [
     path: "/admin/usuarios",
     name: "admin-users",
     component: AdminUsersView,
+    meta: {
+      requiresAuth: true,
+      roles: ["ADMIN"]
+    }
+  },
+  {
+    path: "/admin/olheiros",
+    name: "admin-scouts",
+    component: AdminScoutsView,
     meta: {
       requiresAuth: true,
       roles: ["ADMIN"]

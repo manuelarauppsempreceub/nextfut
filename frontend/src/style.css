@@ -2558,3 +2558,22 @@ tr:last-child td {
     grid-template-columns: 1fr;
   }
 }
+
+/* Fase — Administração de Olheiros */
+.admin-scouts-filters {
+  grid-template-columns: minmax(260px, 1fr) minmax(180px, 0.35fr) auto auto;
+}
+
+.admin-scouts-table-wrapper .data-table {
+  min-width: 1040px;
+}
+
+.admin-scouts-table-wrapper small {
+  color: var(--muted);
+}
+
+@media (max-width: 900px) {
+  .admin-scouts-filters {
+    grid-template-columns: 1fr;
+  }
+}

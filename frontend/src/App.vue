@@ -79,6 +79,13 @@ function logout() {
 
         <RouterLink
           v-if="currentUser?.role === 'ADMIN'"
+          to="/admin/olheiros"
+        >
+          Olheiros
+        </RouterLink>
+
+        <RouterLink
+          v-if="currentUser?.role === 'ADMIN'"
           to="/importar"
         >
           Importar CSV

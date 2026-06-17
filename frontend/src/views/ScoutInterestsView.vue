@@ -1,7 +1,9 @@
 <script setup>
 import { computed, onMounted, ref, watch } from "vue";
-import { RouterLink } from "vue-router";
+import { RouterLink, useRoute } from "vue-router";
 import { api } from "../services/api";
+
+const route = useRoute();
 
 const interests = ref([]);
 const loading = ref(true);
@@ -113,6 +115,14 @@ function clearFilters() {
   search.value = "";
   status.value = "";
 }
+
+
+function syncFiltersFromRoute() {
+  search.value = typeof route.query.search === "string" ? route.query.search : "";
+  status.value = typeof route.query.status === "string" ? route.query.status : "";
+}
+
+watch(() => route.query, syncFiltersFromRoute, { immediate: true });
 
 onMounted(loadInterests);
 </script>

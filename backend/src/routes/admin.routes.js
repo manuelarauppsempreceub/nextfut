@@ -38,6 +38,82 @@ router.get("/users", async (req, res) => {
   })));
 });
 
+
+router.get("/scouts", async (req, res) => {
+  const status = String(req.query.status || "").trim().toUpperCase();
+  const search = String(req.query.search || "").trim().toLowerCase();
+
+  const where = {
+    role: "SCOUT"
+  };
+
+  if (status) {
+    where.status = status;
+  }
+
+  const scoutUsers = await prisma.user.findMany({
+    where,
+    orderBy: {
+      createdAt: "desc"
+    }
+  });
+
+  const filteredScouts = search
+    ? scoutUsers.filter((user) => {
+        const haystack = [
+          user.name,
+          user.email,
+          user.scoutName,
+          user.scoutEmail
+        ]
+          .filter(Boolean)
+          .join(" ")
+          .toLowerCase();
+
+        return haystack.includes(search);
+      })
+    : scoutUsers;
+
+  const scouts = await Promise.all(
+    filteredScouts.map(async (user) => {
+      const interestWhere = {
+        OR: [
+          {
+            scoutEmail: user.scoutEmail || user.email
+          },
+          {
+            scoutName: user.scoutName || user.name
+          }
+        ]
+      };
+
+      const [interestsCount, latestInterest] = await Promise.all([
+        prisma.scoutInterest.count({
+          where: interestWhere
+        }),
+        prisma.scoutInterest.findFirst({
+          where: interestWhere,
+          orderBy: {
+            createdAt: "desc"
+          },
+          include: {
+            athlete: true
+          }
+        })
+      ]);
+
+      return {
+        ...publicUser(user),
+        interestsCount,
+        latestInterest
+      };
+    })
+  );
+
+  res.json(scouts);
+});
+
+
 router.patch("/users/:id/status", async (req, res) => {
   const allowedStatuses = ["PENDING", "ACTIVE", "INACTIVE", "REJECTED"];
   const status = String(req.body.status || "").trim().toUpperCase();
