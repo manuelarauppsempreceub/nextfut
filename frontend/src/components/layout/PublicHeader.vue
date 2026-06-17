@@ -1,153 +1,233 @@
-<script setup>
-import { RouterLink } from "vue-router";
-</script>
-
 <template>
-  <header class="next-public-header">
-    <nav class="next-public-nav next-public-container" aria-label="Navegação pública NextFut">
-      <RouterLink class="next-public-logo" to="/">
-        <span class="next-public-logo__mark">NF</span>
-        <span>NextFut</span>
-      </RouterLink>
-
-      <ul class="next-public-menu">
-        <li><RouterLink to="/portal-atleta">Portal do Atleta</RouterLink></li>
-        <li><RouterLink to="/cadastro/atleta">Cadastro de Atleta</RouterLink></li>
-        <li><RouterLink to="/cadastro/olheiro">Cadastro de Olheiro</RouterLink></li>
-      </ul>
-
-      <div class="next-public-nav-actions">
-        <RouterLink class="next-public-nav-pill next-public-nav-pill--soft" to="/portal-atleta">
-          Consultar desempenho
-        </RouterLink>
-        <RouterLink class="next-public-nav-pill" to="/login">
-          Entrar
-        </RouterLink>
+  <header class="public-header">
+    <RouterLink to="/" class="brand-link" aria-label="NextFut - Página inicial">
+      <div class="brand-mark">
+        NF
       </div>
+
+      <div class="brand-copy">
+        <strong>NextFut</strong>
+        <span>Conectando atletas, avaliações e olheiros.</span>
+      </div>
+    </RouterLink>
+
+    <nav class="public-nav" aria-label="Navegação pública">
+      <div class="register-menu" ref="registerMenuRef">
+        <button
+          type="button"
+          class="nav-button nav-button-primary"
+          @click="toggleRegisterMenu"
+        >
+          Cadastrar
+        </button>
+
+        <div v-if="isRegisterMenuOpen" class="register-dropdown">
+          <RouterLink
+            to="/cadastro/atleta"
+            class="register-dropdown-link"
+            @click="closeRegisterMenu"
+          >
+            Cadastrar-se como Atleta
+          </RouterLink>
+
+          <RouterLink
+            to="/cadastro/olheiro"
+            class="register-dropdown-link"
+            @click="closeRegisterMenu"
+          >
+            Cadastrar-se como Olheiro
+          </RouterLink>
+        </div>
+      </div>
+
+      <RouterLink to="/login" class="nav-button">
+        Entrar
+      </RouterLink>
     </nav>
   </header>
 </template>
 
+<script setup>
+import { onBeforeUnmount, onMounted, ref } from "vue";
+
+const isRegisterMenuOpen = ref(false);
+const registerMenuRef = ref(null);
+
+function toggleRegisterMenu() {
+  isRegisterMenuOpen.value = !isRegisterMenuOpen.value;
+}
+
+function closeRegisterMenu() {
+  isRegisterMenuOpen.value = false;
+}
+
+function handleClickOutside(event) {
+  if (!registerMenuRef.value) {
+    return;
+  }
+
+  if (!registerMenuRef.value.contains(event.target)) {
+    closeRegisterMenu();
+  }
+}
+
+onMounted(() => {
+  document.addEventListener("click", handleClickOutside);
+});
+
+onBeforeUnmount(() => {
+  document.removeEventListener("click", handleClickOutside);
+});
+</script>
+
 <style scoped>
-.next-public-header {
+.public-header {
   position: sticky;
   top: 0;
   z-index: 30;
-  background: rgba(7, 17, 31, 0.82);
-  backdrop-filter: blur(18px);
-  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
-}
-
-.next-public-container {
-  width: min(100% - 40px, 1180px);
-  margin-inline: auto;
-}
-
-.next-public-nav {
-  min-height: 74px;
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 24px;
+  gap: 1.5rem;
+  padding: 1rem clamp(1.25rem, 4vw, 4rem);
+  background: rgba(5, 18, 24, 0.9);
+  border-bottom: 1px solid rgba(148, 163, 184, 0.16);
+  backdrop-filter: blur(16px);
 }
 
-.next-public-logo {
-  display: inline-flex;
+.brand-link {
+  display: flex;
   align-items: center;
-  gap: 12px;
+  gap: 0.85rem;
   color: #f8fafc;
   text-decoration: none;
-  font-weight: 950;
-  letter-spacing: -0.04em;
-  font-size: 1.22rem;
 }
 
-.next-public-logo__mark {
+.brand-mark {
   display: grid;
+  width: 44px;
+  height: 44px;
   place-items: center;
-  width: 38px;
-  height: 38px;
-  border-radius: 14px;
-  background: linear-gradient(135deg, #19e58c, #0ea5e9);
-  color: #06101e;
-  font-weight: 950;
+  border-radius: 16px;
+  background: linear-gradient(135deg, #22c55e, #14b8a6);
+  color: #04111a;
+  font-weight: 900;
+  letter-spacing: -0.05em;
+  box-shadow: 0 18px 40px rgba(34, 197, 94, 0.28);
 }
 
-.next-public-menu {
+.brand-copy {
   display: flex;
-  gap: 8px;
-  list-style: none;
-  align-items: center;
-  flex-wrap: wrap;
-  margin: 0;
-  padding: 0;
+  flex-direction: column;
+  gap: 0.12rem;
 }
 
-.next-public-menu a {
-  color: #cbd5e1;
-  font-size: 0.9rem;
-  font-weight: 800;
-  padding: 9px 12px;
-  border-radius: 999px;
-  text-decoration: none;
+.brand-copy strong {
+  font-size: 1rem;
+  letter-spacing: -0.02em;
 }
 
-.next-public-menu a:hover,
-.next-public-menu a.router-link-active {
-  color: #19e58c;
-  background: rgba(25, 229, 140, 0.08);
+.brand-copy span {
+  color: #a7b5c5;
+  font-size: 0.78rem;
 }
 
-.next-public-nav-actions {
+.public-nav {
   display: flex;
   align-items: center;
-  gap: 10px;
-  margin-left: auto;
+  gap: 0.75rem;
 }
 
-.next-public-nav-pill {
+.nav-button {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  min-height: 38px;
-  padding: 0 15px;
+  min-height: 40px;
+  padding: 0.65rem 1rem;
+  border: 1px solid rgba(148, 163, 184, 0.22);
   border-radius: 999px;
-  background: linear-gradient(135deg, #19e58c, #0fbf72);
-  color: #03120c;
-  font-size: 0.84rem;
-  font-weight: 950;
+  background: rgba(15, 23, 42, 0.5);
+  color: #e2e8f0;
+  font-size: 0.88rem;
+  font-weight: 700;
   text-decoration: none;
-  box-shadow: 0 12px 28px rgba(25, 229, 140, 0.2);
+  cursor: pointer;
+  transition:
+    transform 0.18s ease,
+    border-color 0.18s ease,
+    background 0.18s ease;
 }
 
-.next-public-nav-pill--soft {
-  border: 1px solid rgba(255, 255, 255, 0.12);
-  background: rgba(255, 255, 255, 0.05);
-  color: #f8fafc;
-  box-shadow: none;
+.nav-button:hover {
+  transform: translateY(-1px);
+  border-color: rgba(34, 197, 94, 0.42);
+  background: rgba(15, 23, 42, 0.85);
 }
 
-@media (max-width: 900px) {
-  .next-public-menu {
-    display: none;
-  }
+.nav-button-primary {
+  border-color: rgba(34, 197, 94, 0.5);
+  background: linear-gradient(135deg, #22c55e, #14b8a6);
+  color: #04111a;
 }
 
-@media (max-width: 700px) {
-  .next-public-container {
-    width: min(100% - 28px, 1180px);
+.register-menu {
+  position: relative;
+}
+
+.register-dropdown {
+  position: absolute;
+  top: calc(100% + 0.65rem);
+  right: 0;
+  min-width: 240px;
+  padding: 0.5rem;
+  border: 1px solid rgba(148, 163, 184, 0.2);
+  border-radius: 18px;
+  background: rgba(5, 18, 24, 0.98);
+  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.34);
+}
+
+.register-dropdown-link {
+  display: block;
+  padding: 0.8rem 0.9rem;
+  border-radius: 14px;
+  color: #e2e8f0;
+  font-size: 0.9rem;
+  font-weight: 700;
+  text-decoration: none;
+}
+
+.register-dropdown-link:hover {
+  background: rgba(34, 197, 94, 0.12);
+  color: #bbf7d0;
+}
+
+@media (max-width: 720px) {
+  .public-header {
+    align-items: flex-start;
+    flex-direction: column;
   }
 
-  .next-public-nav {
-    min-height: 68px;
+  .public-nav {
+    width: 100%;
+    flex-wrap: wrap;
   }
 
-  .next-public-nav-actions {
-    gap: 8px;
+  .register-menu {
+    flex: 1;
   }
 
-  .next-public-nav-pill--soft {
-    display: none;
+  .nav-button {
+    width: 100%;
+  }
+
+  .register-dropdown {
+    left: 0;
+    right: auto;
+    width: min(280px, 90vw);
+  }
+
+  .brand-copy span {
+    max-width: 260px;
   }
 }
 </style>
