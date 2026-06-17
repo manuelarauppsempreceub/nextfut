@@ -3,6 +3,7 @@ import { computed, onBeforeUnmount, onMounted, ref } from "vue";
 import { RouterLink } from "vue-router";
 import PublicHeader from "../components/layout/PublicHeader.vue";
 import PublicFooter from "../components/layout/PublicFooter.vue";
+import { api } from "../services/api";
 
 const heroBackgrounds = [
   "/images/home/hero-1.png",
@@ -19,6 +20,63 @@ const currentHeroBackground = computed(() => {
 
 let heroBackgroundTimer = null;
 
+const homeAccessCode = ref("");
+const homeAthlete = ref(null);
+const homeSearchLoading = ref(false);
+const homeSearchError = ref("");
+
+const latestHomeEvaluation = computed(() => {
+  return homeAthlete.value?.evaluations?.[0] || null;
+});
+
+const latestHomePerformance = computed(() => {
+  return latestHomeEvaluation.value?.performanceResult || null;
+});
+
+function homeLevelLabel(level) {
+  const labels = {
+    LOW: "Baixo",
+    MEDIUM: "Médio",
+    HIGH: "Alto"
+  };
+
+  return labels[level] || level || "-";
+}
+
+function homeScoreLabel(value) {
+  if (value === null || value === undefined) {
+    return "-";
+  }
+
+  return value;
+}
+
+async function searchHomeAthlete() {
+  const code = homeAccessCode.value.trim().toUpperCase();
+
+  if (!code) {
+    homeSearchError.value = "Digite seu código de acesso.";
+    homeAthlete.value = null;
+    return;
+  }
+
+  try {
+    homeSearchLoading.value = true;
+    homeSearchError.value = "";
+    homeAthlete.value = null;
+
+    const response = await api.get(`/athletes/access-code/${code}`);
+
+    homeAthlete.value = response.data;
+    homeAccessCode.value = code;
+  } catch (err) {
+    homeSearchError.value =
+      err.response?.data?.message || "Não foi possível encontrar o atleta informado.";
+  } finally {
+    homeSearchLoading.value = false;
+  }
+}
+
 onMounted(() => {
   heroBackgroundTimer = window.setInterval(() => {
     currentHeroBackgroundIndex.value =
@@ -31,7 +89,6 @@ onBeforeUnmount(() => {
     window.clearInterval(heroBackgroundTimer);
   }
 });
-
 </script>
 
 <template>
@@ -66,13 +123,12 @@ onBeforeUnmount(() => {
               <RouterLink class="next-btn next-btn--primary" to="/portal-atleta">
                 Consultar desempenho
               </RouterLink>
+
               <RouterLink class="next-btn next-btn--secondary" to="/login">
                 Acessar plataforma
               </RouterLink>
             </div>
           </div>
-
-          
         </div>
       </section>
 
@@ -137,11 +193,105 @@ onBeforeUnmount(() => {
         </div>
       </section>
 
+      <section class="performance-consult-section">
+  <div class="next-container">
+    <article class="performance-consult-card performance-consult-card--single">
+      <div class="performance-consult-card__content">
+        <div class="next-eyebrow">Portal do Atleta</div>
+
+        <h2 class="next-section-title">
+          Consulte seu desempenho.
+        </h2>
+
+        <p class="next-text">
+          Digite seu código de acesso para visualizar score, pontos fortes,
+          pontos a melhorar e recomendações para evolução.
+        </p>
+
+        <form class="performance-search-form" @submit.prevent="searchHomeAthlete">
+          <label for="home-access-code">Código de acesso</label>
+
+          <div class="performance-search-row">
+            <input
+              id="home-access-code"
+              v-model="homeAccessCode"
+              type="text"
+              placeholder="Ex: NF-0001"
+              autocomplete="off"
+              :disabled="homeSearchLoading"
+            />
+
+            <button
+              class="performance-search-button"
+              type="submit"
+              :disabled="homeSearchLoading"
+            >
+              {{ homeSearchLoading ? "Buscando..." : "Consultar" }}
+            </button>
+          </div>
+
+          <p class="performance-search-hint">
+            O código é informado pelo avaliador ou gestor da plataforma.
+          </p>
+        </form>
+
+        <p v-if="homeSearchError" class="performance-search-error">
+          {{ homeSearchError }}
+        </p>
+
+        <div v-if="homeAthlete" class="performance-result-card">
+          <div class="performance-result-main">
+            <span class="performance-result-badge">
+              {{ homeAthlete.accessCode }}
+            </span>
+
+            <h3>{{ homeAthlete.name }}</h3>
+
+            <p>
+              {{ homeAthlete.position || "Posição não informada" }}
+              ·
+              {{ homeAthlete.region || homeAthlete.country || "Região não informada" }}
+            </p>
+          </div>
+
+          <div class="performance-result-metrics">
+            <div>
+              <span>Score</span>
+              <strong>
+                {{ homeScoreLabel(latestHomePerformance?.performanceScore) }}
+              </strong>
+            </div>
+
+            <div>
+              <span>Nível</span>
+              <strong>
+                {{ homeLevelLabel(latestHomePerformance?.calculatedLevel || latestHomeEvaluation?.level) }}
+              </strong>
+            </div>
+          </div>
+
+          <RouterLink class="performance-result-link" to="/portal-atleta">
+            Ver relatório completo no Portal do Atleta →
+          </RouterLink>
+        </div>
+
+        <div class="performance-login-action">
+          <RouterLink class="performance-login-button" to="/login">
+            Entrar no NextFut
+          </RouterLink>
+        </div>
+      </div>
+    </article>
+  </div>
+</section>
+
       <section class="next-section home-strip-section">
         <div class="next-container">
           <div class="next-section-head--center">
             <div class="next-eyebrow">Como usar</div>
+
             <h2 class="next-section-title">Escolha o seu caminho.</h2>
+
             <p class="next-text next-text--center">
               A página principal funciona como uma entrada rápida para consulta pública,
               cadastro e acesso autenticado ao sistema.
@@ -174,7 +324,9 @@ onBeforeUnmount(() => {
         <div class="next-container signup-band">
           <div>
             <div class="next-eyebrow">Cadastros públicos</div>
+
             <h2 class="next-section-title">Quer participar da plataforma?</h2>
+
             <p class="next-text">
               Atletas e olheiros podem solicitar cadastro. O acesso autenticado fica disponível
               após aprovação administrativa.
@@ -185,6 +337,7 @@ onBeforeUnmount(() => {
             <RouterLink class="next-btn next-btn--primary" to="/cadastro/atleta">
               Cadastro de Atleta
             </RouterLink>
+
             <RouterLink class="next-btn next-btn--secondary" to="/cadastro/olheiro">
               Cadastro de Olheiro
             </RouterLink>
@@ -357,19 +510,6 @@ onBeforeUnmount(() => {
   content: none;
 }
 
-.home-hero__background--active {
-  opacity: 1;
-}
-
-.home-hero__background--next {
-  opacity: 0;
-  transition: opacity 1.2s ease-in-out;
-}
-
-.home-hero__background--next.is-visible {
-  opacity: 1;
-}
-
 .home-hero__overlay {
   position: absolute;
   inset: 0;
@@ -380,12 +520,12 @@ onBeforeUnmount(() => {
       rgba(3, 7, 18, 0.52) 0%,
       rgba(3, 7, 18, 0.28) 30%,
       rgba(3, 7, 18, 0.07) 57%,
-      rgba(3, 7, 18, 0.00) 100%
+      rgba(3, 7, 18, 0) 100%
     ),
     linear-gradient(
       180deg,
       rgba(3, 7, 18, 0.02) 0%,
-      rgba(3, 7, 18, 0.10) 74%,
+      rgba(3, 7, 18, 0.1) 74%,
       rgba(3, 7, 18, 0.22) 100%
     );
   pointer-events: none;
@@ -610,6 +750,239 @@ onBeforeUnmount(() => {
   box-shadow: 0 14px 32px rgba(56, 189, 248, 0.18);
 }
 
+.performance-consult-section {
+  position: relative;
+  padding: 72px 0 18px;
+  background:
+    radial-gradient(circle at 18% 40%, rgba(25, 229, 140, 0.12), transparent 34%),
+    radial-gradient(circle at 82% 26%, rgba(56, 189, 248, 0.12), transparent 32%),
+    #06101e;
+}
+
+.performance-consult-card {
+  position: relative;
+  display: block;
+  max-width: 1036px;
+  margin-inline: auto;
+  padding: clamp(26px, 4vw, 42px);
+  border: 1px solid rgba(25, 229, 140, 0.22);
+  border-radius: 34px;
+  background:
+    radial-gradient(circle at top left, rgba(25, 229, 140, 0.14), transparent 42%),
+    radial-gradient(circle at top right, rgba(56, 189, 248, 0.12), transparent 34%),
+    linear-gradient(135deg, rgba(255, 255, 255, 0.085), rgba(255, 255, 255, 0.032));
+  box-shadow: 0 28px 80px rgba(0, 0, 0, 0.28);
+  overflow: hidden;
+}
+
+.performance-consult-card::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background:
+    radial-gradient(circle at 82% 20%, rgba(56, 189, 248, 0.12), transparent 32%),
+    linear-gradient(90deg, rgba(25, 229, 140, 0.06), transparent 46%);
+}
+
+.performance-consult-card > * {
+  position: relative;
+  z-index: 1;
+}
+
+.performance-consult-card__content {
+  max-width: 760px;
+}
+
+.performance-consult-card__content .next-text {
+  max-width: 720px;
+  text-shadow: none;
+}
+
+.performance-login-action {
+  display: flex;
+  margin-top: 24px;
+}
+
+.performance-login-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 48px;
+  padding: 0 22px;
+  border: 1px solid rgba(255, 255, 255, 0.24);
+  border-radius: 999px;
+  background: rgba(2, 12, 18, 0.38);
+  color: #f8fafc;
+  font-weight: 950;
+  backdrop-filter: blur(8px);
+  transition:
+    transform 0.2s ease,
+    border-color 0.2s ease,
+    background 0.2s ease;
+}
+
+.performance-login-button:hover {
+  transform: translateY(-2px);
+  border-color: rgba(25, 229, 140, 0.42);
+  background: rgba(25, 229, 140, 0.1);
+}
+
+.performance-search-form {
+  display: grid;
+  gap: 10px;
+  max-width: 680px;
+  margin-top: 28px;
+}
+
+.performance-search-form label {
+  color: #cbd5e1;
+  font-size: 0.82rem;
+  font-weight: 900;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.performance-search-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 12px;
+  align-items: center;
+}
+
+.performance-search-row input {
+  width: 100%;
+  min-height: 52px;
+  padding: 0 18px;
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  border-radius: 999px;
+  outline: none;
+  background: rgba(2, 12, 18, 0.46);
+  color: #f8fafc;
+  font-size: 1rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  backdrop-filter: blur(8px);
+}
+
+.performance-search-row input::placeholder {
+  color: rgba(203, 213, 225, 0.58);
+}
+
+.performance-search-row input:focus {
+  border-color: rgba(25, 229, 140, 0.58);
+  box-shadow: 0 0 0 4px rgba(25, 229, 140, 0.12);
+}
+
+.performance-search-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 52px;
+  padding: 0 22px;
+  border: 0;
+  border-radius: 999px;
+  background: linear-gradient(135deg, #19e58c, #0fbf72);
+  color: #03120c;
+  cursor: pointer;
+  font-weight: 950;
+  box-shadow: 0 14px 32px rgba(25, 229, 140, 0.2);
+}
+
+.performance-search-button:disabled {
+  cursor: not-allowed;
+  opacity: 0.68;
+}
+
+.performance-search-hint {
+  margin: 0;
+  color: #94a3b8;
+  font-size: 0.9rem;
+}
+
+.performance-search-error {
+  margin: 16px 0 0;
+  padding: 12px 14px;
+  border: 1px solid rgba(248, 113, 113, 0.32);
+  border-radius: 16px;
+  background: rgba(127, 29, 29, 0.22);
+  color: #fecaca;
+  font-weight: 800;
+}
+
+.performance-result-card {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 18px;
+  align-items: center;
+  margin-top: 20px;
+  padding: 20px;
+  border: 1px solid rgba(25, 229, 140, 0.26);
+  border-radius: 24px;
+  background: rgba(2, 12, 18, 0.42);
+  backdrop-filter: blur(8px);
+}
+
+.performance-result-badge {
+  display: inline-flex;
+  width: fit-content;
+  margin-bottom: 9px;
+  padding: 6px 10px;
+  border-radius: 999px;
+  background: rgba(25, 229, 140, 0.12);
+  color: #19e58c;
+  font-size: 0.78rem;
+  font-weight: 950;
+}
+
+.performance-result-card h3 {
+  margin: 0;
+  font-size: 1.35rem;
+  line-height: 1.1;
+}
+
+.performance-result-card p {
+  margin: 6px 0 0;
+  color: #cbd5e1;
+}
+
+.performance-result-metrics {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(86px, 1fr));
+  gap: 10px;
+}
+
+.performance-result-metrics div {
+  padding: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 18px;
+  background: rgba(255, 255, 255, 0.045);
+}
+
+.performance-result-metrics span {
+  display: block;
+  color: #94a3b8;
+  font-size: 0.76rem;
+  font-weight: 850;
+  text-transform: uppercase;
+}
+
+.performance-result-metrics strong {
+  display: block;
+  margin-top: 2px;
+  color: #19e58c;
+  font-size: 1.25rem;
+  line-height: 1;
+}
+
+.performance-result-link {
+  grid-column: 1 / -1;
+  display: inline-flex;
+  width: fit-content;
+  color: #38bdf8;
+  font-weight: 950;
+}
+
 .next-section {
   padding: 88px 0;
 }
@@ -708,8 +1081,15 @@ onBeforeUnmount(() => {
     padding: 64px 0 78px;
   }
 
+  .performance-search-row,
+  .performance-result-card,
   .portal-gateway,
   .steps-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .performance-search-row,
+  .performance-result-card {
     grid-template-columns: 1fr;
   }
 
