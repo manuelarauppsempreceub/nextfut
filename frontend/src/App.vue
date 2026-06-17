@@ -8,7 +8,15 @@ const router = useRouter();
 
 const currentUser = ref(getCurrentUser());
 
-const isPublicLayout = computed(() => Boolean(route.meta.publicLayout));
+const isPublicLayout = computed(() => {
+  const isAthletePortal = route.path === "/portal-atleta";
+
+  if (isAthletePortal && currentUser.value) {
+    return false;
+  }
+
+  return Boolean(route.meta.publicLayout);
+});
 
 watch(
   () => route.fullPath,
