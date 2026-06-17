@@ -1,147 +1,405 @@
-# Relatório Consolidado do MVP — NextFut
+# Relatório Consolidado Atualizado do MVP — NextFut
 
 ## 1. Visão geral
 
-O NextFut é uma plataforma MVP para avaliação, desempenho e scouting de jogadores de futebol.
+O NextFut é uma plataforma MVP para avaliação, desempenho e scouting de atletas de futebol de base.
 
-O objetivo do sistema é permitir o cadastro de atletas, o registro de avaliações técnicas, físicas e táticas, o cálculo automatizado de score de desempenho, a consulta do atleta por código de acesso e o registro de interesse por olheiros.
+O sistema permite operar uma jornada completa de demonstração:
 
-O MVP foi desenvolvido de forma incremental, por fases, priorizando uma base funcional simples, operável localmente e com fluxo completo mínimo para validação do produto.
-
----
-
-## 2. Stack técnica
-
-A stack atual do projeto é composta por:
-
-* Backend: Node.js + Express
-* ORM: Prisma
-* Banco de dados: PostgreSQL 16
-* Frontend: Vue 3 + Vite
-* Cliente HTTP: Axios
-* Containerização: Docker Compose
-* Ambiente local principal: Windows + PowerShell
-* Versionamento: Git
-
-Serviços locais:
-
-| Serviço    | URL/Porta             |
-| ---------- | --------------------- |
-| Frontend   | http://localhost:5173 |
-| Backend    | http://localhost:3000 |
-| PostgreSQL | localhost:5432        |
-
-Healthchecks principais:
-
-```powershell
-curl.exe http://localhost:3000/api/health
-curl.exe http://localhost:3000/api/db-health
-```
+1. acesso à homepage pública;
+2. consulta de desempenho por código no Portal do Atleta;
+3. cadastro público de atletas e olheiros;
+4. aprovação administrativa de usuários;
+5. importação de atletas e avaliações por CSV;
+6. cálculo automatizado de score;
+7. gestão de atletas;
+8. radar para olheiros;
+9. registro e gestão de interesses;
+10. administração de usuários e olheiros;
+11. reset da base operacional de atletas para novas demonstrações.
 
 ---
 
-## 3. Estrutura geral do projeto
+## 2. Estado de versionamento atual
 
-Estrutura principal:
+Últimos commits relevantes:
 
 ```text
-nextfut/
-  backend/
-    prisma/
-    src/
-      database/
-      routes/
-      services/
-    Dockerfile
-  frontend/
-    src/
-      router/
-      services/
-      views/
-    Dockerfile
-  infra/
-    postgres/
-  docs/
-  docker-compose.yml
-  README.md
+e4db66b style: aplica novo layout publico da homepage
+c4ec77c fix: ajusta navegacao publica do portal do atleta
+a2afc72 feat: adiciona listagem administrativa de olheiros
+671e95d feat: aprimora importacao reset e gestao de atletas
+6fef606 feat: adiciona home publica autenticacao e perfis de usuario
 ```
 
-Principais áreas:
+Branch local:
 
-* `backend/src/routes`: rotas HTTP da API;
-* `backend/src/services`: regras auxiliares, incluindo cálculo de desempenho e importação CSV;
-* `backend/prisma`: schema, migrations e seed;
-* `frontend/src/views`: telas principais da aplicação;
-* `frontend/src/router`: rotas da aplicação Vue;
-* `docs`: documentação operacional e relatórios técnicos.
+```text
+master
+```
+
+Remote:
+
+```text
+origin https://github.com/eduardohirle22/projeto1-eduardo-futebol.git
+```
+
+Branch remota de trabalho:
+
+```text
+origin/nextfut-mvp-atual
+```
 
 ---
 
-## 4. Modelo de dados atual
+## 3. Stack atual
 
-O modelo core atual contempla as seguintes entidades principais.
+- Backend: Node.js + Express
+- ORM: Prisma
+- Banco: PostgreSQL 16
+- Frontend: Vue 3 + Vite
+- Cliente HTTP: Axios
+- Autenticação: JWT + bcryptjs
+- Containerização: Docker Compose
+- Versionamento: Git/GitHub
 
-### 4.1 Athlete
+URLs:
 
-Representa o atleta cadastrado na plataforma.
+| Serviço | URL |
+|---|---|
+| Frontend | http://localhost:5173 |
+| Backend | http://localhost:3000 |
+| Health backend | http://localhost:3000/api/health |
+| Health banco | http://localhost:3000/api/db-health |
 
-Campos principais:
+---
 
-* `accessCode`
-* `name`
-* `age`
-* `position`
-* `dominantFoot`
-* `heightCm`
-* `country`
-* `region`
-* `schoolProject`
-* `status`
+## 4. Áreas do sistema
 
-### 4.2 Evaluator
+### 4.1 Área pública
 
-Representa avaliadores cadastrados no sistema.
+Rotas:
 
-### 4.3 Evaluation
+```text
+/
+ /login
+ /cadastro/atleta
+ /cadastro/olheiro
+ /portal-atleta
+```
 
-Representa uma avaliação de atleta, podendo ser manual ou originada por CSV.
+### 4.2 Área autenticada
 
-Campos principais:
+Rotas:
 
-* notas técnicas;
-* condição física;
-* tomada de decisão;
-* disciplina;
-* métricas de jogo;
-* nota final;
-* potencial;
-* fonte da avaliação.
+```text
+/dashboard
+/atletas
+/atletas/:id
+/olheiro
+/interesses
+/importar
+/admin/usuarios
+/admin/olheiros
+```
 
-### 4.4 PerformanceResult
+---
 
-Representa o resultado calculado da avaliação.
+## 5. Homepage pública
 
-Campos principais:
+A homepage pública foi redesenhada com visual inspirado em versão anterior do projeto.
 
-* `performanceScore`
-* `calculatedLevel`
-* taxas calculadas;
-* pontos fortes;
-* pontos fracos;
-* recomendações.
+Características:
 
-### 4.5 ScoutInterest
+- header público com marca NextFut;
+- hero com proposta de valor;
+- painel “Radar NextFut”;
+- área de acesso rápido;
+- cards para Portal do Atleta e Login/Dashboard;
+- seção “Como usar”;
+- footer público.
 
-Representa o interesse de um olheiro por determinado atleta.
+Arquivos envolvidos:
 
-Campos principais:
+```text
+frontend/src/views/HomeView.vue
+frontend/src/components/layout/PublicHeader.vue
+frontend/src/components/layout/PublicFooter.vue
+```
 
-* nome do olheiro;
-* e-mail;
-* observação;
-* status do interesse.
+A homepage usa CSS isolado/scoped para evitar impacto no sistema autenticado.
 
-Status possíveis:
+---
+
+## 6. Autenticação e perfis
+
+O sistema possui autenticação com JWT.
+
+Perfis:
+
+```text
+ADMIN
+VISITOR
+SCOUT
+ATHLETE
+```
+
+Status de usuário:
+
+```text
+PENDING
+ACTIVE
+INACTIVE
+REJECTED
+```
+
+Usuário administrador seed:
+
+```text
+admin@nextfut.local
+Admin@123
+```
+
+---
+
+## 7. Cadastro público
+
+### 7.1 Atleta
+
+Rota:
+
+```text
+/cadastro/atleta
+```
+
+Cria:
+
+- atleta;
+- usuário `ATHLETE`;
+- status `PENDING`.
+
+O atleta precisa aceitar a visualização dos dados por administradores e olheiros.
+
+### 7.2 Olheiro
+
+Rota:
+
+```text
+/cadastro/olheiro
+```
+
+Cria:
+
+- usuário `SCOUT`;
+- status `PENDING`.
+
+---
+
+## 8. Portal do Atleta
+
+Rota:
+
+```text
+/portal-atleta
+```
+
+O Portal do Atleta é público.
+
+O atleta consulta o desempenho por código, sem necessidade de login.
+
+Exibe:
+
+- nome;
+- posição;
+- região;
+- código;
+- idade;
+- score;
+- nível;
+- potencial;
+- pontos fortes;
+- pontos a melhorar;
+- recomendações;
+- data da última avaliação.
+
+O botão final do resultado retorna para a homepage pública.
+
+---
+
+## 9. Dashboard
+
+Rota:
+
+```text
+/dashboard
+```
+
+Exibe indicadores da plataforma:
+
+- total de atletas;
+- total de avaliados;
+- total de interesses;
+- score médio;
+- alto desempenho;
+- médio desempenho;
+- baixo desempenho.
+
+Inclui:
+
+- gráfico de distribuição por nível;
+- gráfico de teia/maturidade;
+- últimos atletas;
+- últimos interesses.
+
+---
+
+## 10. Atletas
+
+Rota:
+
+```text
+/atletas
+```
+
+Funcionalidades:
+
+- listagem filtrável;
+- busca;
+- filtro por posição;
+- filtro por região;
+- filtro por nível;
+- filtro por status;
+- default de filtro em atletas ativos;
+- paginação;
+- ordenação;
+- detalhamento em modal;
+- cadastro em modal;
+- inativação/reativação para administradores;
+- acesso ao perfil do atleta.
+
+Status:
+
+```text
+ACTIVE
+INACTIVE
+```
+
+---
+
+## 11. Perfil do Atleta
+
+Rota:
+
+```text
+/atletas/:id
+```
+
+Funcionalidades:
+
+- visualizar dados cadastrais;
+- editar atleta, conforme permissão;
+- visualizar métricas;
+- criar avaliação, conforme permissão;
+- registrar interesse, conforme permissão;
+- visualizar histórico de avaliações;
+- visualizar pontos fortes, fracos e recomendações.
+
+---
+
+## 12. Importação CSV
+
+Rota:
+
+```text
+/importar
+```
+
+A importação CSV foi ajustada para bases de captação escolar.
+
+Exemplo de colunas aceitas:
+
+```text
+NOME_JOGADOR
+PAIS
+REGIAO_DF
+DATA_NASCIMENTO
+IDADE
+POSICAO
+ALTURA_CM
+PE_PREFERENCIAL
+JOGOS
+TOTAL_MINUTOS_JOGADOS
+GOLS
+ASSISTENCIAS
+PASSES_CERTOS_PCT
+CHUTES_CERTOS_POR_JOGO
+DRIBBLES_CERTOS_POR_JOGO
+DISPUTAS_BOLA_VENCIDAS_POR_JOGO
+BOLAS_RECUPERADAS_POR_JOGO
+FALTAS_POR_JOGO
+CARTAO_AMARELO
+CARTAO_VERMELHO
+```
+
+A importação:
+
+- normaliza nomes de colunas;
+- aceita colunas em maiúsculas;
+- interpreta valores com percentual entre parênteses;
+- cria/atualiza atletas;
+- cria avaliações;
+- calcula performance.
+
+Importante:
+
+- e-mail não é obrigatório para importação operacional;
+- e-mail será obrigatório apenas em fluxo futuro de criação automática de usuários atletas.
+
+---
+
+## 13. Radar do Olheiro
+
+Rota:
+
+```text
+/olheiro
+```
+
+Disponível para:
+
+```text
+ADMIN
+SCOUT
+```
+
+Recursos:
+
+- indicadores de atletas;
+- filtros;
+- ranking por score;
+- acesso ao perfil;
+- leitura de pontos fortes e pontos a melhorar.
+
+---
+
+## 14. Interesses
+
+Rota:
+
+```text
+/interesses
+```
+
+Recursos:
+
+- listagem de interesses;
+- busca por atleta, código, olheiro ou e-mail;
+- filtro por status;
+- atualização de status;
+- link para perfil do atleta;
+- suporte a filtro por olheiro a partir da tela administrativa de olheiros.
+
+Status:
 
 ```text
 INTERESTED
@@ -151,479 +409,198 @@ DISCARDED
 
 ---
 
-## 5. Funcionalidades implementadas
+## 15. Administração de usuários
 
-Até a Fase 22, o MVP possui as seguintes funcionalidades.
+Rota:
 
-### 5.1 Infraestrutura
+```text
+/admin/usuarios
+```
 
-* Docker Compose com PostgreSQL, backend e frontend;
-* backend Express rodando em container;
-* frontend Vue/Vite rodando em container;
-* Prisma configurado para execução local e em Docker;
-* healthchecks de backend e banco;
-* documentação operacional local.
+Disponível apenas para:
 
-### 5.2 Atletas
+```text
+ADMIN
+```
 
-* listagem de atletas;
-* cadastro manual de atletas;
-* geração automática de código de acesso;
-* perfil detalhado do atleta;
-* edição dos dados cadastrais;
-* preservação do código de acesso durante edição.
+Recursos:
 
-### 5.3 Importação CSV
-
-* upload de CSV pelo backend;
-* tela web de importação;
-* leitura de colunas e prévia;
-* criação/atualização de atletas;
-* criação de avaliações a partir de dados importados;
-* cálculo automático de desempenho.
-
-### 5.4 Avaliações
-
-* cadastro manual de avaliação pelo perfil;
-* notas técnicas, físicas, táticas e métricas de jogo;
-* cálculo automático de score;
-* criação automática de resultado de desempenho;
-* histórico de avaliações no perfil;
-* atualização do score mais recente.
-
-### 5.5 Portal do atleta
-
-* consulta por código de acesso;
-* exibição do perfil do atleta;
-* exibição do score mais recente;
-* exibição de nível, potencial, pontos fortes, pontos fracos e recomendações;
-* manutenção do acesso pelo mesmo código após edição cadastral.
-
-### 5.6 Olheiro
-
-* painel inicial do olheiro;
-* filtros por nome, posição, região e nível;
-* ranking por score;
-* registro de interesse no perfil do atleta;
-* painel de interesses;
-* atualização de status dos interesses.
-
-### 5.7 Dashboard
-
-* resumo da plataforma na Home;
-* total de atletas;
-* total de avaliações;
-* total de interesses;
-* score médio;
-* atletas por nível;
-* últimos atletas cadastrados;
-* últimos interesses registrados.
+- listar usuários;
+- filtrar por status;
+- aprovar usuário;
+- rejeitar usuário;
+- inativar usuário;
+- impedir desativação do último administrador ativo;
+- reset da base de atletas.
 
 ---
 
-## 6. Fluxo operacional atual do MVP
+## 16. Administração de olheiros
 
-O fluxo operacional mínimo do sistema é:
+Rota:
 
-1. subir a stack com Docker Compose;
-2. cadastrar atleta manualmente ou importar CSV;
-3. acessar a listagem de atletas;
-4. abrir o perfil do atleta;
-5. registrar avaliação manual ou importar avaliação;
-6. gerar score automaticamente;
-7. consultar recomendações de treino;
-8. acessar portal do atleta usando o código de acesso;
-9. registrar interesse do olheiro;
-10. acompanhar interesses e atualizar status;
-11. acompanhar indicadores no dashboard.
+```text
+/admin/olheiros
+```
+
+Disponível apenas para:
+
+```text
+ADMIN
+```
+
+Recursos:
+
+- listar usuários `SCOUT`;
+- buscar por nome/e-mail;
+- filtrar por status;
+- visualizar quantidade de interesses;
+- visualizar último interesse;
+- aprovar, rejeitar ou inativar olheiros conforme status;
+- navegar para a tela de interesses filtrada pelo olheiro.
 
 ---
 
-## 7. Histórico consolidado das fases
+## 17. Reset administrativo
 
-### Fase 1 — Estrutura inicial
+O reset da base de atletas está disponível na área administrativa.
 
-Criação da estrutura base do projeto.
-
-Commit:
+Confirmação exigida:
 
 ```text
-2fee622 chore: cria estrutura inicial do projeto nexfut
+ZERAR ATLETAS
 ```
 
-### Fase 2 — Docker Compose com PostgreSQL
-
-Criação do serviço PostgreSQL no Docker Compose.
-
-Commit:
-
-```text
-75db619 chore: adiciona docker compose com postgres
-```
-
-### Correção de nome do projeto
-
-Padronização do nome para NextFut.
-
-Commits:
-
-```text
-19e5a53 chore: corrige nome do projeto para nextfut
-a07d84b fix: ajusta textos do backend para nextfut
-```
-
-### Fase 3/4 — Backend e Prisma
-
-Criação do backend Express, conexão com PostgreSQL e healthchecks.
-
-Commit:
-
-```text
-fc4a2e6 feat: configura prisma e healthcheck do banco
-```
-
-### Fase 5 — Modelos core
-
-Criação dos modelos iniciais do domínio.
-
-Commit:
-
-```text
-0a6574e feat: cria modelos core iniciais do nextfut
-```
-
-### Fase 6 — Endpoint inicial de importação CSV
-
-Criação do endpoint básico de upload CSV.
-
-Commit:
-
-```text
-444748e feat: adiciona endpoint inicial de importacao csv
-```
-
-### Fase 7 — Importação real e cálculo de score
-
-Importação real de atletas/avaliações e cálculo de desempenho.
-
-Commit:
-
-```text
-2bb092c feat: importa atletas e avaliacoes via csv
-```
-
-### Fase 8 — Frontend Vue base
-
-Criação do frontend e listagem inicial de atletas.
-
-Commit:
-
-```text
-10ea1e4 feat: cria frontend vue base com listagem de atletas
-```
-
-### Fase 9 — Perfil detalhado
-
-Criação do perfil detalhado do atleta.
-
-Commit:
-
-```text
-7760c97 feat: adiciona perfil detalhado do atleta
-```
-
-### Fase 10 — Correção importação e score
-
-Melhoria na importação CSV e no cálculo de score com dados parciais.
-
-Commit:
-
-```text
-8b8b544 fix: melhora importacao csv e calculo de score
-```
-
-### Fase 11 — Painel do olheiro
-
-Criação do painel inicial do olheiro.
-
-Commit:
-
-```text
-c4a62bd feat: adiciona painel inicial do olheiro
-```
-
-### Fase 12 — Tela de importação CSV
-
-Criação da tela web de importação.
-
-Commit:
-
-```text
-727bd83 feat: adiciona tela de importacao csv
-```
-
-### Fase 13 — Portal do atleta
-
-Consulta do atleta por código de acesso.
-
-Commit:
-
-```text
-3c0ec44 feat: adiciona portal do atleta por codigo de acesso
-```
-
-### Fase 14 — Registro de interesse
-
-Registro de interesse do olheiro no atleta.
-
-Commit:
-
-```text
-a915aec feat: registra interesse do olheiro no atleta
-```
-
-### Fase 15 — Painel de interesses
-
-Tela para acompanhar interesses registrados.
-
-Commit:
-
-```text
-946f9b8 feat: adiciona painel de interesses dos olheiros
-```
-
-### Fase 16 — Status dos interesses
-
-Atualização do status do interesse.
-
-Commit:
-
-```text
-4d2f6d7 feat: atualiza status dos interesses dos olheiros
-```
-
-### Fase 17 — Dashboard resumo
-
-Criação do dashboard resumo da plataforma.
-
-Commit:
-
-```text
-6093c4a feat: adiciona dashboard resumo da plataforma
-```
-
-### Fase 18 — Docker Compose integrado
-
-Integração de backend e frontend ao Docker Compose.
-
-Commits:
-
-```text
-060d27c chore: integra backend e frontend ao docker compose
-bc52b55 fix: ajusta prisma para execucao no docker
-```
-
-### Fase 19 — Documentação operacional
-
-Criação da documentação operacional do projeto.
-
-Commit:
-
-```text
-a09c30c docs: adiciona documentacao operacional do nextfut
-```
-
-### Fase 20 — Cadastro manual de atletas
-
-Cadastro manual de atletas pela interface.
-
-Commit:
-
-```text
-0cb1864 feat: adiciona cadastro manual de atletas
-```
-
-### Fase 21 — Cadastro manual de avaliações
-
-Cadastro manual de avaliação pelo perfil do atleta.
-
-Commit:
-
-```text
-b4c2218 feat: adiciona cadastro manual de avaliacoes
-```
-
-### Fase 22 — Edição cadastral de atletas
-
-Edição dos dados cadastrais do atleta, preservando o código de acesso.
-
-Commit:
-
-```text
-476e0ae feat: adiciona edicao cadastral de atletas
-```
+Remove:
+
+- interesses;
+- resultados de performance;
+- avaliações;
+- usuários atletas;
+- atletas.
+
+Preserva:
+
+- administradores;
+- olheiros;
+- estrutura do banco.
 
 ---
 
-## 8. Estado atual do repositório
+## 18. Permissões resumidas
 
-Últimos commits confirmados:
+### ADMIN
 
-```text
-476e0ae feat: adiciona edicao cadastral de atletas
-b4c2218 feat: adiciona cadastro manual de avaliacoes
-0cb1864 feat: adiciona cadastro manual de atletas
-a09c30c docs: adiciona documentacao operacional do nextfut
-bc52b55 fix: ajusta prisma para execucao no docker
-060d27c chore: integra backend e frontend ao docker compose
-6093c4a feat: adiciona dashboard resumo da plataforma
-```
+Pode tudo no MVP atual.
+
+### SCOUT
+
+Pode:
+
+- acessar radar;
+- visualizar atletas;
+- criar avaliações;
+- registrar interesses;
+- gerenciar interesses.
+
+Não pode:
+
+- administrar usuários;
+- importar CSV;
+- criar/inativar atletas.
+
+### ATHLETE
+
+Pode:
+
+- consultar portal por código;
+- logar, se aprovado;
+- editar o próprio cadastro.
+
+Não pode:
+
+- criar avaliações;
+- registrar interesses;
+- acessar administração.
+
+### VISITOR
+
+Acesso público sem login.
 
 ---
 
-## 9. Pontos de atenção técnicos
+## 19. Pontos técnicos de atenção
 
-### 9.1 Encoding no Windows
+### Encoding
 
-Durante o desenvolvimento houve problemas de acentuação em arquivos `.vue`, causados por escrita via PowerShell sem controle explícito de UTF-8.
+Usar UTF-8 sem BOM para evitar problemas de acentuação.
 
-Recomendação:
+### Prisma
 
-* usar UTF-8 sem BOM para arquivos sensíveis;
-* evitar regravações amplas quando patches pontuais forem suficientes;
-* validar acentuação no navegador.
-
-Exemplo recomendado:
+Quando alterar schema:
 
 ```powershell
-[System.IO.File]::WriteAllText(
-  "CAMINHO_DO_ARQUIVO",
-  $conteudo,
-  [System.Text.UTF8Encoding]::new($false)
-)
+docker compose exec backend npx prisma generate
 ```
 
-### 9.2 Prisma em Docker
+ou local:
 
-O Prisma Client precisou de ajuste no import para execução dentro do container.
-
-Arquivo:
-
-```text
-backend/src/database/prisma.js
+```powershell
+cd C:\Apps\nextfut\backend
+npx prisma generate
 ```
 
-Padrão atual:
+### Frontend em Docker
 
-```js
-import "dotenv/config";
-import pkg from "@prisma/client";
-import { PrismaPg } from "@prisma/adapter-pg";
+Após alterações de frontend:
 
-const { PrismaClient } = pkg;
-
-const adapter = new PrismaPg({
-  connectionString: process.env.DATABASE_URL
-});
-
-const prisma = new PrismaClient({
-  adapter
-});
-
-export default prisma;
+```powershell
+docker compose exec frontend npm run build
+docker compose restart frontend
 ```
 
-### 9.3 Docker Desktop
+### Backend em Docker
 
-Quando o Docker Desktop está desligado, podem ocorrer erros de conexão com PostgreSQL.
+Após alterações de backend:
 
-Erro típico:
-
-```text
-P1001: Can't reach database server at localhost:5432
+```powershell
+docker compose restart backend
 ```
-
-Correção:
-
-1. iniciar Docker Desktop;
-2. subir a stack;
-3. validar `docker compose ps`.
 
 ---
 
-## 10. Pontos de atenção funcionais
+## 20. Próximas evoluções
 
-### 10.1 Código de acesso
-
-O `accessCode` é usado no portal do atleta e deve permanecer estável.
-
-A edição cadastral não altera esse campo.
-
-### 10.2 Avaliações e score
-
-O score é recalculado a cada nova avaliação.
-
-A avaliação mais recente aparece como referência principal no perfil, portal e listagens.
-
-### 10.3 Importação CSV
-
-A importação CSV já funciona, mas pode evoluir futuramente para:
-
-* validação mais robusta;
-* mapeamento assistido de colunas;
-* importação com pré-validação antes de gravar;
-* relatório de erros mais detalhado.
-
-### 10.4 Layout
-
-A aplicação já é funcional, mas o layout ainda foi construído incrementalmente.
-
-Há necessidade de uma fase específica para:
-
-* padronizar estrutura visual;
-* melhorar navegação;
-* organizar cabeçalho/menu;
-* padronizar cards, botões e formulários;
-* melhorar responsividade;
-* reduzir CSS duplicado;
-* criar uma aparência mais profissional de MVP demonstrável.
+- anonimização completa por perfil;
+- criação opcional de usuários atletas na importação CSV;
+- modelo de senha temporária;
+- recuperação de senha;
+- dashboard específico por perfil;
+- detalhamento modal de olheiro;
+- histórico de ações administrativas;
+- mobile responsivo com menu hambúrguer;
+- transformação de tabelas em cards no mobile;
+- filtros avançados no radar;
+- melhoria do Portal do Atleta com layout visual da nova home;
+- padronização de design system.
 
 ---
 
-## 11. Próxima fase recomendada
+## 21. Conclusão
 
-A próxima fase recomendada é:
+O MVP NextFut encontra-se em um estado demonstrável e operacional.
 
-```text
-Fase 24 — Padronização do layout da aplicação
-```
+Ele já possui:
 
-Objetivos sugeridos:
+- homepage pública moderna;
+- portal público do atleta;
+- autenticação;
+- perfis;
+- gestão administrativa;
+- importação robusta;
+- scouting;
+- interesses;
+- reset de demonstração;
+- versionamento remoto no GitHub.
 
-1. criar layout base mais consistente;
-2. reorganizar navegação principal;
-3. melhorar Home/Dashboard;
-4. padronizar formulários;
-5. padronizar cards;
-6. padronizar botões e badges;
-7. melhorar telas:
-
-   * Atletas;
-   * Perfil do atleta;
-   * Portal do atleta;
-   * Olheiro;
-   * Interesses;
-   * Importação CSV;
-8. preservar funcionalidades existentes;
-9. evitar regressões de rotas;
-10. versionar a fase.
-
----
-
-## 12. Conclusão
-
-O MVP do NextFut alcançou um estágio funcional relevante.
-
-O sistema já permite operar um ciclo completo de gestão inicial de atletas, desde cadastro/importação até avaliação, cálculo de desempenho, consulta por atleta e interação com olheiros.
-
-O foco recomendado antes de novas funcionalidades é consolidar a experiência visual e a usabilidade da aplicação, tornando o MVP mais adequado para demonstração, validação com usuários e evolução futura.
+O sistema está pronto para demonstrações e para continuidade incremental de funcionalidades.
