@@ -38,4 +38,7 @@ cd ~/nextfut/backend
 npm install
 npx prisma generate
 pm2 restart nextfut-backend
+pm2 list
+curl http://localhost:3000/api/health
+
 

@@ -399,42 +399,6 @@ onMounted(loadSummary);
                   {{ item.label }}
                 </text>
 
-                <text
-                  v-for="(item, index) in radarMetrics"
-                  :key="`value-${item.key}`"
-                  class="maturity-radar-value"
-                  :x="radarValuePoint(index).x"
-                  :y="radarValuePoint(index).y"
-                  text-anchor="middle"
-                  dominant-baseline="middle"
-                >
-                  {{ item.axisLabel }}
-                </text>
-
-                <circle
-                  class="maturity-radar-center-circle"
-                  :cx="radarCenter"
-                  :cy="radarCenter"
-                  r="35"
-                />
-
-                <text
-                  class="maturity-radar-center-label"
-                  :x="radarCenter"
-                  :y="radarCenter - 7"
-                  text-anchor="middle"
-                >
-                  Score
-                </text>
-
-                <text
-                  class="maturity-radar-center-score"
-                  :x="radarCenter"
-                  :y="radarCenter + 15"
-                  text-anchor="middle"
-                >
-                  {{ averageScore }}
-                </text>
               </svg>
             </div>
 
