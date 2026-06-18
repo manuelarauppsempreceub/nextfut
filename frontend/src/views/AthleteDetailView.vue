@@ -374,7 +374,7 @@ onMounted(loadAthlete);
         <RadarComparisonChart
           v-if="performanceComparison?.criteria?.length"
           class="profile-radar"
-          title="Desempenho comparativo"
+          title="Desempenho comparativo do atleta com os demais"
           description="Comparativo entre a última avaliação do atleta e a média da última avaliação dos demais atletas ativos."
           :items="performanceComparison.criteria"
         />

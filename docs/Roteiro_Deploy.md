@@ -2,7 +2,7 @@
 
 git add .
 
-git commit -m "altera layout da pagina consultar desempenho"
+git commit -m "altera os graficos de teia - titulo do radar tecnico"
 
 git push manuela HEAD:main
 git push origin HEAD:nextfut-mvp-atual
@@ -19,6 +19,9 @@ cd ~/nextfut
 
 git pull origin main
 
+
+## Se alterou o front
+
 cd ~/nextfut/frontend
 
 npm install
@@ -27,4 +30,12 @@ npm run build
 
 sudo nginx -t
 sudo systemctl reload nginx
+
+## Se alterou o back
+
+cd ~/nextfut/backend
+
+npm install
+npx prisma generate
+pm2 restart nextfut-backend
 
