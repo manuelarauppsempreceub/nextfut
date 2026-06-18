@@ -2,6 +2,7 @@
 import { computed, onMounted, ref } from "vue";
 import { RouterLink, useRoute } from "vue-router";
 import { api } from "../services/api";
+import RadarComparisonChart from "../components/charts/RadarComparisonChart.vue";
 import {
   canEditAthlete,
   canCreateEvaluation,
@@ -13,6 +14,9 @@ const route = useRoute();
 const athlete = ref(null);
 const loading = ref(true);
 const error = ref("");
+
+const performanceComparison = ref(null);
+const performanceComparisonLoading = ref(false);
 
 const interestLoading = ref(false);
 const interestMessage = ref("");
@@ -137,6 +141,24 @@ async function submitAthleteEdit() {
   }
 }
 
+async function loadPerformanceComparison() {
+  if (!route.params.id) {
+    performanceComparison.value = null;
+    return;
+  }
+
+  try {
+    performanceComparisonLoading.value = true;
+
+    const response = await api.get(`/athletes/${route.params.id}/performance-comparison`);
+    performanceComparison.value = response.data;
+  } catch (err) {
+    performanceComparison.value = null;
+  } finally {
+    performanceComparisonLoading.value = false;
+  }
+}
+
 async function loadAthlete() {
   try {
     loading.value = true;
@@ -144,6 +166,8 @@ async function loadAthlete() {
 
     const response = await api.get(`/athletes/${route.params.id}`);
     athlete.value = response.data;
+
+    await loadPerformanceComparison();
   } catch (err) {
     error.value = "Não foi possível carregar o perfil do atleta.";
   } finally {
@@ -346,6 +370,18 @@ onMounted(loadAthlete);
             <strong>{{ latestEvaluation?.potential || "-" }}</strong>
           </div>
         </div>
+        
+        <RadarComparisonChart
+          v-if="performanceComparison?.criteria?.length"
+          class="profile-radar"
+          title="Desempenho comparativo"
+          description="Comparativo entre a última avaliação do atleta e a média da última avaliação dos demais atletas ativos."
+          :items="performanceComparison.criteria"
+        />
+
+        <div v-else-if="performanceComparisonLoading" class="empty">
+          Carregando gráfico comparativo...
+        </div>        
 
         <div v-if="latestPerformance" class="analysis-grid">
           <div class="analysis-card">
@@ -540,3 +576,9 @@ onMounted(loadAthlete);
     </div>
   </section>
 </template>
+
+<style scoped>
+.profile-radar {
+  margin: 24px 0;
+}
+</style>

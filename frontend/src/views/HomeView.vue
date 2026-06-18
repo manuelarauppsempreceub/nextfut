@@ -148,7 +148,7 @@ onBeforeUnmount(() => {
           </div>
 
           <div class="portal-gateway portal-gateway--strip" aria-label="Acesso aos portais NextFut">
-            <RouterLink to="/portal-atleta" class="portal-card portal-card--athlete">
+            <RouterLink to="/login?redirect=/portal-atleta" class="portal-card portal-card--athlete">
               <div class="portal-card__top">
                 <div class="portal-card__icon">⚽</div>
                 <span class="portal-card__badge">Para jogadores</span>
@@ -166,7 +166,7 @@ onBeforeUnmount(() => {
                 <span>Plano de evolução</span>
               </div>
 
-              <strong class="portal-card__cta">Consultar desempenho →</strong>
+              <strong class="portal-card__cta">Entrar como atleta →</strong>
             </RouterLink>
 
             <RouterLink to="/login?redirect=/dashboard" class="portal-card portal-card--scout">

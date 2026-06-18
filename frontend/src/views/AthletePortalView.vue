@@ -1,5 +1,6 @@
 ﻿<script setup>
 import { computed, ref } from "vue";
+import RadarComparisonChart from "../components/charts/RadarComparisonChart.vue";
 import { RouterLink } from "vue-router";
 import { api } from "../services/api";
 
@@ -8,6 +9,8 @@ const athlete = ref(null);
 const loading = ref(false);
 const error = ref("");
 
+const performanceComparison = ref(null);
+
 const latestEvaluation = computed(() => {
   return athlete.value?.evaluations?.[0] || null;
 });
@@ -15,6 +18,20 @@ const latestEvaluation = computed(() => {
 const latestPerformance = computed(() => {
   return latestEvaluation.value?.performanceResult || null;
 });
+
+async function loadPerformanceComparison(athleteId) {
+  if (!athleteId) {
+    performanceComparison.value = null;
+    return;
+  }
+
+  try {
+    const response = await api.get(`/athletes/${athleteId}/performance-comparison`);
+    performanceComparison.value = response.data;
+  } catch (err) {
+    performanceComparison.value = null;
+  }
+}
 
 async function searchAthlete() {
   const code = accessCode.value.trim().toUpperCase();
@@ -34,7 +51,9 @@ async function searchAthlete() {
 
     athlete.value = response.data;
     accessCode.value = code;
+    await loadPerformanceComparison(response.data.id);
   } catch (err) {
+    performanceComparison.value = null;
     error.value =
       err.response?.data?.message || "Não foi possível encontrar o atleta.";
   } finally {
@@ -159,6 +178,14 @@ function hasList(items) {
             <strong>{{ latestEvaluation?.potential || "-" }}</strong>
           </article>
         </div>
+
+        <RadarComparisonChart
+          v-if="performanceComparison?.criteria?.length"
+          class="portal-radar"
+          title="Seu desempenho no radar"
+          description="Comparativo entre sua última avaliação e a média da última avaliação dos demais atletas."
+          :items="performanceComparison.criteria"
+        />        
 
         <div v-if="latestPerformance" class="analysis-grid">
           <article class="analysis-card analysis-card--strength">
@@ -637,5 +664,32 @@ function hasList(items) {
   .portal-button {
     width: 100%;
   }
+}
+
+.portal-radar {
+  margin-bottom: 26px;
+}
+
+.portal-radar :deep(.radar-card) {
+  border-color: rgba(255, 255, 255, 0.12);
+  background:
+    radial-gradient(circle at top left, rgba(25, 229, 140, 0.13), transparent 42%),
+    rgba(2, 12, 18, 0.34);
+  box-shadow: none;
+}
+
+.portal-radar :deep(.radar-card__header p:not(.eyebrow)),
+.portal-radar :deep(.radar-table__row),
+.portal-radar :deep(.radar-label) {
+  color: #cbd5e1;
+}
+
+.portal-radar :deep(.radar-card__header h2),
+.portal-radar :deep(.radar-table__row strong) {
+  color: #f8fafc;
+}
+
+.portal-radar :deep(.radar-table__row) {
+  background: rgba(15, 23, 42, 0.56);
 }
 </style>

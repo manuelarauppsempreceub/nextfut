@@ -2,7 +2,7 @@
 
 git add .
 
-git commit -m "retira card nextfut da home"
+git commit -m "altera layout da pagina consultar desempenho"
 
 git push manuela HEAD:main
 git push origin HEAD:nextfut-mvp-atual
